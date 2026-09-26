@@ -102,14 +102,18 @@ export function App() {
 
   // Handle URL deep linking & browser back/forward
   useEffect(() => {
-    const handlePopState = () => {
+    const handleUrlChange = () => {
       const el = parseElementFromPath();
       if (el) {
         setSelectedElement(el);
       }
     };
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
   }, []);
 
   const selectElement = useCallback(
@@ -117,10 +121,10 @@ export function App() {
       setSelectedElement(el);
       setSelectedIon(null);
 
-      // Update URL without full page reload
-      const newPath = `/elements/${el.symbol}`;
-      if (window.location.pathname !== newPath) {
-        window.history.pushState(null, '', newPath);
+      // Update URL hash safely for both root and subpath hosting (e.g. /periodic-table/#elements/H)
+      const newHash = `#elements/${el.symbol}`;
+      if (window.location.hash !== newHash) {
+        window.history.pushState(null, '', newHash);
       }
 
       // Add to recent elements

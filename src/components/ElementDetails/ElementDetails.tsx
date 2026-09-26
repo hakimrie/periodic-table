@@ -72,7 +72,8 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
   const cat = categoryMetadata[displayElement.category] || categoryMetadata.unknown;
 
   const handleShare = () => {
-    const url = `${window.location.origin}/elements/${element.symbol}`;
+    const basePath = window.location.pathname.replace(/\/$/, '');
+    const url = `${window.location.origin}${basePath}/#elements/${element.symbol}`;
     navigator.clipboard.writeText(url).then(() => {
       setCopiedShare(true);
       setTimeout(() => setCopiedShare(false), 2500);
