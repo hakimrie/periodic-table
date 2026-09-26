@@ -166,10 +166,10 @@ export const CompareElements: React.FC<CompareElementsProps> = ({
       {/* Header */}
       <div className="flex flex-col gap-2 p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl">
         <div className="flex items-center gap-2">
-          <Scale className="w-5 h-5 text-cyan-400" />
-          <h2 className="text-xl font-bold text-slate-100">{t('compare.title', 'Element Comparison Tool')}</h2>
+          <Scale className="w-5 h-5 text-cyan-400" aria-hidden="true" />
+          <h1 className="text-xl font-bold text-slate-100">{t('compare.title', 'Element Comparison Tool')}</h1>
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-300">
           {t('compare.subtitle', 'Compare physical, chemical, and atomic properties side-by-side')}
         </p>
       </div>
@@ -179,24 +179,26 @@ export const CompareElements: React.FC<CompareElementsProps> = ({
         {/* Element A Selector */}
         <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center gap-4">
           <div
-            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-xl border shrink-0"
-            style={{ backgroundColor: catA.colorBg, borderColor: catA.colorBorder, color: catA.colorText }}
+            data-category-symbol
+            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-xl border shrink-0 text-slate-100"
+            style={{ backgroundColor: catA.colorBg, borderColor: catA.colorBorder }}
           >
-            <span className="text-[10px] opacity-70 font-mono">{elementA.atomicNumber}</span>
+            <span className="text-[10px] opacity-80 font-mono text-slate-300">{elementA.atomicNumber}</span>
             <span>{elementA.symbol}</span>
           </div>
 
           <div className="flex-1">
-            <label className="text-xs text-slate-400 font-semibold block mb-1">
+            <label htmlFor="compare-select-a" className="text-xs text-slate-300 font-semibold block mb-1">
               {t('compare.selectElementA', 'Element A')}:
             </label>
             <select
+              id="compare-select-a"
               value={elementA.atomicNumber}
               onChange={(e) => {
                 const el = allElements.find((x) => x.atomicNumber === parseInt(e.target.value, 10));
                 if (el) setElementA(el);
               }}
-              className="w-full bg-slate-950 text-slate-200 border border-slate-700/80 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-400 outline-none"
+              className="w-full bg-slate-950 text-slate-100 border border-slate-700/80 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-400 outline-none"
             >
               {allElements.map((el) => (
                 <option key={el.atomicNumber} value={el.atomicNumber}>
@@ -210,24 +212,26 @@ export const CompareElements: React.FC<CompareElementsProps> = ({
         {/* Element B Selector */}
         <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 flex items-center gap-4">
           <div
-            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-xl border shrink-0"
-            style={{ backgroundColor: catB.colorBg, borderColor: catB.colorBorder, color: catB.colorText }}
+            data-category-symbol
+            className="w-14 h-14 rounded-xl flex flex-col items-center justify-center font-bold text-xl border shrink-0 text-slate-100"
+            style={{ backgroundColor: catB.colorBg, borderColor: catB.colorBorder }}
           >
-            <span className="text-[10px] opacity-70 font-mono">{elementB.atomicNumber}</span>
+            <span className="text-[10px] opacity-80 font-mono text-slate-300">{elementB.atomicNumber}</span>
             <span>{elementB.symbol}</span>
           </div>
 
           <div className="flex-1">
-            <label className="text-xs text-slate-400 font-semibold block mb-1">
+            <label htmlFor="compare-select-b" className="text-xs text-slate-300 font-semibold block mb-1">
               {t('compare.selectElementB', 'Element B')}:
             </label>
             <select
+              id="compare-select-b"
               value={elementB.atomicNumber}
               onChange={(e) => {
                 const el = allElements.find((x) => x.atomicNumber === parseInt(e.target.value, 10));
                 if (el) setElementB(el);
               }}
-              className="w-full bg-slate-950 text-slate-200 border border-slate-700/80 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-400 outline-none"
+              className="w-full bg-slate-950 text-slate-100 border border-slate-700/80 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-cyan-400 outline-none"
             >
               {allElements.map((el) => (
                 <option key={el.atomicNumber} value={el.atomicNumber}>
@@ -240,56 +244,68 @@ export const CompareElements: React.FC<CompareElementsProps> = ({
       </div>
 
       {/* Side-by-Side Comparison Table with Visual Differences */}
-      <div className="rounded-2xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-xl">
-        <div className="grid grid-cols-12 bg-slate-950/80 p-4 border-b border-slate-800 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-          <div className="col-span-4 sm:col-span-5">{t('compare.property', 'Property')}</div>
-          <div className="col-span-4 sm:col-span-3 text-cyan-300 font-mono text-sm">
-            {getLocalizedElementName(elementA.atomicNumber, lang) || elementA.name} ({elementA.symbol})
-          </div>
-          <div className="col-span-4 sm:col-span-4 text-pink-300 font-mono text-sm">
-            {getLocalizedElementName(elementB.atomicNumber, lang) || elementB.name} ({elementB.symbol})
-          </div>
-        </div>
-
-        <div className="divide-y divide-slate-800/60 text-sm">
-          {rows.map((row, idx) => (
-            <div
-              key={idx}
-              className={`grid grid-cols-12 p-3.5 sm:p-4 items-center transition-colors ${
-                idx % 2 === 0 ? 'bg-slate-900/40' : 'bg-slate-900/80'
-              }`}
-            >
-              {/* Property Name */}
-              <div className="col-span-4 sm:col-span-5 text-xs sm:text-sm text-slate-300 font-medium">
-                {row.label}
-              </div>
-
-              {/* Value A */}
-              <div
-                className={`col-span-4 sm:col-span-3 font-mono text-xs sm:text-sm flex items-center gap-1.5 ${
-                  row.higher === 'A'
-                    ? 'text-cyan-300 font-bold bg-cyan-950/30 px-2 py-1 rounded border border-cyan-800/40'
-                    : 'text-slate-300'
-                }`}
+      <div className="rounded-2xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-xl overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[500px]">
+          <caption className="sr-only">
+            {t('compare.title', 'Element Comparison Tool')}: {elementA.name} vs {elementB.name}
+          </caption>
+          <thead>
+            <tr className="bg-slate-950/80 border-b border-slate-800 text-xs font-semibold text-slate-300 uppercase tracking-wider">
+              <th scope="col" className="p-4 w-5/12 sm:w-5/12">{t('compare.property', 'Property')}</th>
+              <th scope="col" className="p-4 w-3.5/12 sm:w-3.5/12 text-cyan-300 font-mono text-sm">
+                {getLocalizedElementName(elementA.atomicNumber, lang) || elementA.name} ({elementA.symbol})
+              </th>
+              <th scope="col" className="p-4 w-3.5/12 sm:w-3.5/12 text-pink-300 font-mono text-sm">
+                {getLocalizedElementName(elementB.atomicNumber, lang) || elementB.name} ({elementB.symbol})
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800/60 text-sm">
+            {rows.map((row, idx) => (
+              <tr
+                key={idx}
+                className={`transition-colors ${idx % 2 === 0 ? 'bg-slate-900/40' : 'bg-slate-900/80'}`}
               >
-                <span>{row.valA}</span>
-                {row.higher === 'A' && <span className="text-[10px] text-cyan-400 font-bold">▲</span>}
-              </div>
+                {/* Property Name */}
+                <th scope="row" className="p-3.5 sm:p-4 text-xs sm:text-sm text-slate-200 font-medium">
+                  {row.label}
+                </th>
 
-              {/* Value B */}
-              <div
-                className={`col-span-4 sm:col-span-4 font-mono text-xs sm:text-sm flex items-center gap-1.5 ${
-                  row.higher === 'B'
-                    ? 'text-pink-300 font-bold bg-pink-950/30 px-2 py-1 rounded border border-pink-800/40'
-                    : 'text-slate-300'
-                }`}
-              >
-                <span>{row.valB}</span>
-                {row.higher === 'B' && <span className="text-[10px] text-pink-400 font-bold">▲</span>}
-              </div>
-            </div>
-          ))}
-        </div>
+                {/* Value A */}
+                <td className="p-3.5 sm:p-4 font-mono text-xs sm:text-sm">
+                  <span
+                    className={`inline-flex items-center gap-1.5 ${
+                      row.higher === 'A'
+                        ? 'text-cyan-300 font-bold bg-cyan-950/40 px-2 py-1 rounded border border-cyan-800/50'
+                        : 'text-slate-200'
+                    }`}
+                  >
+                    <span>{row.valA}</span>
+                    {row.higher === 'A' && (
+                      <span aria-label={`Higher value for ${elementA.name}`} className="text-[10px] text-cyan-400 font-bold">▲</span>
+                    )}
+                  </span>
+                </td>
+
+                {/* Value B */}
+                <td className="p-3.5 sm:p-4 font-mono text-xs sm:text-sm">
+                  <span
+                    className={`inline-flex items-center gap-1.5 ${
+                      row.higher === 'B'
+                        ? 'text-pink-300 font-bold bg-pink-950/40 px-2 py-1 rounded border border-pink-800/50'
+                        : 'text-slate-200'
+                    }`}
+                  >
+                    <span>{row.valB}</span>
+                    {row.higher === 'B' && (
+                      <span aria-label={`Higher value for ${elementB.name}`} className="text-[10px] text-pink-400 font-bold">▲</span>
+                    )}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

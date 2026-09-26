@@ -176,8 +176,32 @@ export function App() {
     return z < 118 ? getElementById(z + 1) : undefined;
   }, [selectedElement]);
 
+  // Dynamic document title for accessibility and browser tabs
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      table: `${selectedElement.name} (${selectedElement.symbol}, Z=${selectedElement.atomicNumber}) - ${t('app.title', 'Interactive Periodic Table')}`,
+      trends: `${t('nav.trends', 'Trends Explorer')} - ${t('app.title', 'Interactive Periodic Table')}`,
+      compare: `${t('nav.compare', 'Compare Elements')} - ${t('app.title', 'Interactive Periodic Table')}`,
+      quiz: `${t('nav.quiz', 'Periodic Quiz')} - ${t('app.title', 'Interactive Periodic Table')}`,
+    };
+    document.title = titles[activeTab] || t('app.title', 'Interactive Periodic Table');
+  }, [activeTab, selectedElement, t]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-cyan-500 selection:text-slate-950">
+      {/* Accessible Skip Link for keyboard navigation */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2.5 focus:bg-cyan-500 focus:text-slate-950 focus:font-extrabold focus:rounded-xl focus:shadow-2xl focus:ring-4 focus:ring-cyan-300 transition-transform"
+      >
+        {t('skipToContent', 'Skip to main content')}
+      </a>
+
+      {/* Accessible Live Region for search results & status updates */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {matchedElementIds !== undefined ? `${matchedElementIds.size} ${t('searchResults', 'elements found')}` : ''}
+      </div>
+
       {/* Global Header */}
       <Header
         searchQuery={searchQuery}
@@ -197,7 +221,7 @@ export function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 py-6 space-y-8">
+      <main id="main-content" tabIndex={-1} className="flex-1 max-w-[1600px] w-full mx-auto px-3 sm:px-6 py-6 space-y-8 outline-none">
         {/* TAB 1: PERIODIC TABLE & EXPLORATION */}
         {activeTab === 'table' && (
           <div className="space-y-8 animate-fade-in">
@@ -238,7 +262,7 @@ export function App() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400">
-                          <Layers className="w-4 h-4" />
+                          <Layers className="w-4 h-4" aria-hidden="true" />
                         </span>
                         <span className="font-bold text-slate-200 text-sm">
                           {t('mode.quantumOrbital', 'Quantum Orbital Spin Diagram')}
@@ -249,22 +273,26 @@ export function App() {
                       </span>
                     </div>
 
-                    <p className="text-slate-400 leading-relaxed text-xs">
+                    <p className="text-slate-300 leading-relaxed text-xs">
                       {t('mode.quantumOrbitalHint', "Subshell energy levels, Pauli exclusion, and Hund's rule spin arrows (↑↓) are featured in University Mode.")}
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-2 pt-1">
                       <button
+                        type="button"
                         onClick={() => setEducationalMode('university')}
-                        className="flex-1 py-2 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow"
+                        className="flex-1 py-2 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow focus-visible:ring-2 focus-visible:ring-cyan-400"
                       >
-                        <Microscope className="w-3.5 h-3.5" />
+                        <Microscope className="w-3.5 h-3.5" aria-hidden="true" />
                         <span>{t('mode.switchToUniversity', 'Switch to University Mode')}</span>
                       </button>
 
                       <button
+                        type="button"
                         onClick={() => setShowOrbitalAnyway(!showOrbitalAnyway)}
-                        className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs border border-slate-700/80 transition-colors"
+                        aria-expanded={showOrbitalAnyway}
+                        aria-controls="orbital-collapsible-preview"
+                        className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs border border-slate-700/80 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
                       >
                         {showOrbitalAnyway
                           ? t('mode.hideOrbital', 'Hide Orbital Diagram')
@@ -273,7 +301,7 @@ export function App() {
                     </div>
 
                     {showOrbitalAnyway && (
-                      <div className="pt-3 border-t border-slate-800 animate-fade-in">
+                      <div id="orbital-collapsible-preview" className="pt-3 border-t border-slate-800 animate-fade-in">
                         <OrbitalDiagram element={selectedElement} />
                       </div>
                     )}

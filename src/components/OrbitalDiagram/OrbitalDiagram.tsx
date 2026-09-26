@@ -137,16 +137,16 @@ export const OrbitalDiagram: React.FC<OrbitalDiagramProps> = ({ element, classNa
       </div>
 
       {/* Orbital Rows */}
-      <div className="py-4 space-y-3 overflow-x-auto">
+      <div role="list" aria-label="Orbital subshell energy levels" className="py-4 space-y-3 overflow-x-auto">
         {orbitals.map((orb) => (
-          <div key={orb.name} className="flex items-center gap-3 min-w-[280px]">
+          <div role="listitem" key={orb.name} className="flex items-center gap-3 min-w-[280px]">
             {/* Subshell Label */}
             <div className="w-12 text-right">
               <span
                 className={`font-mono text-xs font-semibold px-1.5 py-0.5 rounded ${
                   orb.isValence
                     ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                    : 'text-slate-400'
+                    : 'text-slate-300'
                 }`}
               >
                 {orb.name}
@@ -154,34 +154,45 @@ export const OrbitalDiagram: React.FC<OrbitalDiagramProps> = ({ element, classNa
             </div>
 
             {/* Orbital Boxes */}
-            <div className="flex items-center gap-1.5">
-              {orb.boxes.map((box, bIdx) => (
-                <div
-                  key={bIdx}
-                  className={`w-9 h-11 rounded-lg flex items-center justify-center gap-1 font-mono text-sm border transition-all ${
-                    box.electrons.length === 2
-                      ? 'bg-slate-800/80 border-cyan-500/50 text-cyan-200'
-                      : box.electrons.length === 1
-                      ? 'bg-slate-800/50 border-amber-500/50 text-amber-300'
-                      : 'bg-slate-950/40 border-slate-800 text-slate-600'
-                  }`}
-                  title={`${box.label}: ${box.electrons.length} electron(s)`}
-                >
-                  {box.electrons.includes('up') && (
-                    <span className="text-cyan-400 font-bold text-base leading-none">↑</span>
-                  )}
-                  {box.electrons.includes('down') && (
-                    <span className="text-pink-400 font-bold text-base leading-none">↓</span>
-                  )}
-                  {box.electrons.length === 0 && (
-                    <span className="text-slate-700 text-xs">0</span>
-                  )}
-                </div>
-              ))}
+            <div className="flex items-center gap-1.5" role="group" aria-label={`Subshell ${orb.name} orbitals`}>
+              {orb.boxes.map((box, bIdx) => {
+                const boxStateText =
+                  box.electrons.length === 2
+                    ? 'paired (spin up, spin down)'
+                    : box.electrons.length === 1
+                    ? 'unpaired (spin up)'
+                    : 'empty';
+
+                return (
+                  <div
+                    key={bIdx}
+                    role="img"
+                    aria-label={`Orbital ${box.label}: ${boxStateText}`}
+                    className={`w-9 h-11 rounded-lg flex items-center justify-center gap-1 font-mono text-sm border transition-all ${
+                      box.electrons.length === 2
+                        ? 'bg-slate-800/80 border-cyan-500/50 text-cyan-200'
+                        : box.electrons.length === 1
+                        ? 'bg-slate-800/50 border-amber-500/50 text-amber-300'
+                        : 'bg-slate-950/40 border-slate-700/60 text-slate-400'
+                    }`}
+                    title={`${box.label}: ${box.electrons.length} electron(s)`}
+                  >
+                    {box.electrons.includes('up') && (
+                      <span className="text-cyan-400 font-bold text-base leading-none" aria-hidden="true">↑</span>
+                    )}
+                    {box.electrons.includes('down') && (
+                      <span className="text-pink-400 font-bold text-base leading-none" aria-hidden="true">↓</span>
+                    )}
+                    {box.electrons.length === 0 && (
+                      <span className="text-slate-500 text-xs font-bold" aria-hidden="true">-</span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Electron count for subshell */}
-            <div className="text-xs text-slate-500 font-mono">
+            <div className="text-xs text-slate-300 font-mono">
               ({orb.boxes.reduce((acc, b) => acc + b.electrons.length, 0)} e⁻)
             </div>
           </div>
@@ -192,30 +203,30 @@ export const OrbitalDiagram: React.FC<OrbitalDiagramProps> = ({ element, classNa
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t border-slate-800 text-xs">
         <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
           <div className="font-semibold text-cyan-300 mb-1 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" aria-hidden="true" />
             {t('orbital.aufbau', 'Aufbau Principle')}
           </div>
-          <p className="text-slate-400 leading-relaxed text-[11px]">
+          <p className="text-slate-300 leading-relaxed text-[11px]">
             {t('orbital.aufbauDesc', 'Electrons fill lower-energy atomic orbitals (1s → 2s → 2p → 3s...) before filling higher-energy subshells to minimize total energy.')}
           </p>
         </div>
 
         <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
           <div className="font-semibold text-pink-300 mb-1 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-pink-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-pink-400" aria-hidden="true" />
             {t('orbital.pauli', 'Pauli Exclusion Principle')}
           </div>
-          <p className="text-slate-400 leading-relaxed text-[11px]">
+          <p className="text-slate-300 leading-relaxed text-[11px]">
             {t('orbital.pauliDesc', 'No two electrons in an atom can have the same four quantum numbers. Each orbital holds at most 2 electrons with opposing spins (↑↓).')}
           </p>
         </div>
 
         <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
           <div className="font-semibold text-amber-300 mb-1 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-400" aria-hidden="true" />
             {t('orbital.hund', "Hund's Rule of Maximum Multiplicity")}
           </div>
-          <p className="text-slate-400 leading-relaxed text-[11px]">
+          <p className="text-slate-300 leading-relaxed text-[11px]">
             {t('orbital.hundDesc', 'Degenerate orbitals of equal energy (e.g. 2px, 2py, 2pz) are each occupied by one electron with parallel spins (↑) before any orbital is paired up.')}
           </p>
         </div>

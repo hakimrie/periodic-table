@@ -132,4 +132,46 @@ describe('ElementDetails Educational Modes', () => {
     fireEvent.click(quickRefBtn);
     expect(onModeChange).toHaveBeenCalledWith('quick-reference');
   });
+
+  it('renders accessible controls with proper ARIA attributes', () => {
+    const onToggleFavorite = vi.fn();
+    const hydrogen = getElementById(1)!;
+    const helium = getElementById(2)!;
+    const lithium = getElementById(3)!;
+
+    render(
+      <ElementDetails
+        element={helium}
+        prevElement={hydrogen}
+        nextElement={lithium}
+        onSelectElement={vi.fn()}
+        educationalMode="high-school"
+        onModeChange={vi.fn()}
+        tempUnit="C"
+        onTempUnitChange={vi.fn()}
+        isFavorite={true}
+        onToggleFavorite={onToggleFavorite}
+      />
+    );
+
+    // Favorite button has aria-pressed="true"
+    const favBtn = screen.getByRole('button', { name: /remove from favorites/i });
+    expect(favBtn).toHaveAttribute('aria-pressed', 'true');
+
+    // Prev / Next element navigation buttons have descriptive aria-labels
+    expect(screen.getByRole('button', { name: /previous element: hydrogen/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /next element: lithium/i })).toBeInTheDocument();
+
+    // Mode buttons have aria-pressed
+    const hsBtn = screen.getByRole('button', { name: /high school/i });
+    expect(hsBtn).toHaveAttribute('aria-pressed', 'true');
+
+    // Accordion button has aria-expanded and aria-controls
+    const deepDiveBtn = screen.getByRole('button', { name: /want to go deeper/i });
+    expect(deepDiveBtn).toHaveAttribute('aria-expanded', 'false');
+    expect(deepDiveBtn).toHaveAttribute('aria-controls', 'deep-mechanics-panel');
+
+    fireEvent.click(deepDiveBtn);
+    expect(deepDiveBtn).toHaveAttribute('aria-expanded', 'true');
+  });
 });

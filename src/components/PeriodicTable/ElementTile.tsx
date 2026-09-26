@@ -61,10 +61,11 @@ export const ElementTile: React.FC<ElementTileProps> = ({
 
   return (
     <button
+      id={`element-tile-${element.atomicNumber}`}
       type="button"
       role="gridcell"
       aria-selected={isSelected}
-      aria-label={`${localizedName}, ${t('element.atomicNumber', 'atomic number')} ${element.atomicNumber}, ${t('element.symbol', 'symbol')} ${element.symbol}, ${t('element.category', 'category')} ${t(`categories.${element.category}`, cat.name)}`}
+      aria-label={`${localizedName} (${element.symbol}), ${t('element.atomicNumber', 'atomic number')} ${element.atomicNumber}, ${element.atomicMassString} u, ${t(`categories.${element.category}`, cat.name)}.${trendDisplayValue ? ` ${t('trends.trendMode', 'Trend')}: ${trendDisplayValue}.` : ''}`}
       tabIndex={0}
       onClick={() => onSelect(element)}
       onMouseEnter={() => onHover && onHover(element)}
@@ -72,7 +73,7 @@ export const ElementTile: React.FC<ElementTileProps> = ({
       onFocus={() => onHover && onHover(element)}
       onBlur={() => onHover && onHover(null)}
       style={customStyle}
-      className={`relative flex flex-col justify-between p-1.5 rounded-lg border text-left transition-transform duration-100 select-none outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:z-20 ${
+      className={`relative flex flex-col justify-between p-1.5 rounded-lg border text-left transition-transform duration-100 select-none outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 focus-visible:z-20 ${
         isSelected
           ? 'ring-2 ring-cyan-400 shadow-lg shadow-cyan-500/25 scale-[1.05] z-10 font-bold'
           : 'hover:scale-[1.02] hover:z-10 hover:shadow-md hover:border-cyan-400/80'
@@ -80,13 +81,13 @@ export const ElementTile: React.FC<ElementTileProps> = ({
     >
       {/* Top Row: Atomic Number + Trend or Block */}
       <div className="flex items-center justify-between w-full text-[10px] sm:text-[11px] leading-none font-mono">
-        <span className="font-bold text-slate-300">{element.atomicNumber}</span>
+        <span className="font-bold text-slate-200">{element.atomicNumber}</span>
         {trendDisplayValue ? (
-          <span className="text-[9px] font-semibold text-cyan-300 truncate max-w-[42px]">
+          <span className="text-[9px] font-bold text-cyan-300 truncate max-w-[42px]">
             {trendDisplayValue}
           </span>
         ) : (
-          <span className="text-[9px] text-slate-500 uppercase">{element.block}</span>
+          <span className="text-[9px] text-slate-300 font-semibold uppercase">{element.block}</span>
         )}
       </div>
 
@@ -99,8 +100,8 @@ export const ElementTile: React.FC<ElementTileProps> = ({
 
       {/* Bottom: Name + Mass */}
       <div className="flex flex-col w-full text-[9px] sm:text-[10px] leading-tight text-center truncate">
-        <span className="truncate text-slate-200 font-medium">{localizedName}</span>
-        <span className="text-[8px] sm:text-[9px] text-slate-400 font-mono truncate">
+        <span className="truncate text-slate-100 font-semibold">{localizedName}</span>
+        <span className="text-[8px] sm:text-[9px] text-slate-300 font-mono font-medium truncate">
           {element.atomicMassString}
         </span>
       </div>

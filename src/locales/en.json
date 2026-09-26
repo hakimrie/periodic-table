@@ -10,6 +10,13 @@
     "highSchoolMode": "High School",
     "universityMode": "University",
     "quickRefMode": "Quick Reference",
+    "skipToContent": "Skip to main content",
+    "clearSearch": "Clear search input",
+    "searchResults": "Found matching elements",
+    "closeDialog": "Close dialog",
+    "favoriteAdd": "Add to favorites",
+    "favoriteRemove": "Remove from favorites",
+    "mainNav": "Main navigation",
     "footerTitle": "Interactive Periodic Table Learning Application — Designed for high-school & university chemistry education.",
     "footerDesc": "Scientific data compiled from IUPAC (2024 Periodic Table), NIST Physical Measurement Laboratory, and PubChem. All 118 chemical elements verified for atomic numbers, electron shells, masses, and periodic relationships."
   },

@@ -407,70 +407,81 @@ export const Atom3D: React.FC<Atom3DProps> = ({
         {/* View neutral / ion toggle button */}
         {element.commonIons.length > 0 && onToggleIon && (
           <button
+            type="button"
             onClick={onToggleIon}
-            className={`text-xs px-3 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 ${
+            aria-pressed={!!selectedIon}
+            aria-label={selectedIon ? `Switch to neutral atom from ion ${selectedIon.formula}` : `Simulate ion ${element.commonIons[0]?.formula} in 3D`}
+            className={`text-xs px-3 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-cyan-400 ${
               selectedIon
                 ? 'bg-pink-600 text-white shadow-lg shadow-pink-500/30'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
             }`}
-            title="Toggle between neutral atom and ionized electron configuration"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
             {selectedIon ? `${t('element.viewingIn3D')} (${selectedIon.formula})` : t('element.simulateIn3D')}
           </button>
         )}
       </div>
 
       {/* Main 3D Canvas / 2D Canvas Area */}
-      <div className="relative w-full h-80 sm:h-96 flex items-center justify-center bg-radial from-slate-900 via-slate-950 to-slate-950">
+      <div
+        role="img"
+        aria-label={`${element.name} (${element.symbol}) atomic model with ${element.protons} protons, ${element.neutronsMostCommon} neutrons, and ${totalElectrons} electrons across ${activeShells.length} shells`}
+        className="relative w-full h-80 sm:h-96 flex items-center justify-center bg-radial from-slate-900 via-slate-950 to-slate-950"
+      >
         {use2DFallback ? (
           <canvas
             ref={canvasRef}
             width={400}
             height={400}
+            aria-hidden="true"
             className="w-full h-full max-w-[400px] max-h-[400px]"
           />
         ) : (
-          <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
+          <div ref={containerRef} aria-hidden="true" className="w-full h-full cursor-grab active:cursor-grabbing" />
         )}
 
         {/* Nucleus & Electrons Quick Overlay Badge */}
         <div className="absolute top-3 left-3 flex flex-col gap-1 pointer-events-none">
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs border border-slate-700/60 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs border border-slate-700/60 text-slate-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500" aria-hidden="true" />
             <span>{t('element.protons', 'Protons')}: <strong className="text-slate-100">{element.protons}</strong></span>
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs border border-slate-700/60 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs border border-slate-700/60 text-slate-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500" aria-hidden="true" />
             <span>{t('element.neutrons', 'Neutrons')}: <strong className="text-slate-100">{element.neutronsMostCommon}</strong></span>
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs border border-slate-700/60 text-slate-300">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
+          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-md text-xs border border-slate-700/60 text-slate-200">
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" aria-hidden="true" />
             <span>{t('element.electrons', 'Electrons')}: <strong className="text-slate-100">{totalElectrons}</strong></span>
           </div>
         </div>
 
         {/* 2D / 3D Mode Toggle Switch */}
-        <div className="absolute top-3 right-3 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1 rounded-lg border border-slate-700/60">
+        <div role="group" aria-label="Renderer mode" className="absolute top-3 right-3 flex items-center gap-1 bg-slate-900/80 backdrop-blur-md p-1 rounded-lg border border-slate-700/60">
           {webglError && (
             <span className="text-[10px] text-amber-400 font-medium px-1">2D Fallback Active</span>
           )}
           <button
+            type="button"
             onClick={() => setUse2DFallback(false)}
             disabled={webglError}
-            className={`px-2 py-1 text-xs rounded font-medium transition-colors ${
-              !use2DFallback ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+            aria-pressed={!use2DFallback}
+            aria-label="3D WebGL Visualization"
+            className={`px-2 py-1 text-xs rounded font-medium transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+              !use2DFallback ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
             } ${webglError ? 'opacity-50 cursor-not-allowed' : ''}`}
-            title="3D WebGL Visualization"
           >
             3D
           </button>
           <button
+            type="button"
             onClick={() => setUse2DFallback(true)}
-            className={`px-2 py-1 text-xs rounded font-medium transition-colors ${
-              use2DFallback ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+            aria-pressed={use2DFallback}
+            aria-label="2D High-DPI Canvas Fallback"
+            className={`px-2 py-1 text-xs rounded font-medium transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+              use2DFallback ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
             }`}
-            title="2D High-DPI Canvas Fallback"
           >
             2D
           </button>
@@ -482,49 +493,57 @@ export const Atom3D: React.FC<Atom3DProps> = ({
         <div className="flex items-center gap-2">
           {/* Pause / Play */}
           <button
+            type="button"
             onClick={() => setIsPlaying(!isPlaying)}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors"
-            title={isPlaying ? 'Pause orbital animation' : 'Resume orbital animation'}
+            aria-label={isPlaying ? 'Pause orbital animation' : 'Resume orbital animation'}
+            aria-pressed={!isPlaying}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
           >
-            {isPlaying ? <Pause className="w-3.5 h-3.5 text-amber-400" /> : <Play className="w-3.5 h-3.5 text-emerald-400" />}
+            {isPlaying ? <Pause className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" /> : <Play className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />}
             <span>{isPlaying ? t('atom3D.pause', 'Pause') : t('atom3D.play', 'Resume')}</span>
           </button>
 
           {/* Reset Camera */}
           {!use2DFallback && (
             <button
+              type="button"
               onClick={handleResetCamera}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
-              title="Reset 3D camera orientation"
+              aria-label="Reset 3D camera orientation"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{t('atom3D.resetCamera', 'Reset View')}</span>
             </button>
           )}
 
           {/* Toggle Shell Labels */}
           <button
+            type="button"
             onClick={() => setShowShellLabels(!showShellLabels)}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
-              showShellLabels ? 'bg-cyan-900/40 text-cyan-300 border border-cyan-800/60' : 'bg-slate-800 text-slate-400'
+            aria-pressed={showShellLabels}
+            aria-label={showShellLabels ? 'Hide electron shell labels' : 'Show electron shell labels'}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+              showShellLabels ? 'bg-cyan-900/40 text-cyan-300 border border-cyan-800/60' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
             }`}
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Layers className="w-3.5 h-3.5" aria-hidden="true" />
             <span>{t('atom3D.toggleShells', 'Shells')}</span>
           </button>
         </div>
 
         {/* Shell configuration badges */}
-        <div className="flex items-center gap-1.5 overflow-x-auto py-1 text-[11px]">
+        <div role="list" aria-label="Electron shell configuration" className="flex items-center gap-1.5 overflow-x-auto py-1 text-[11px]">
           {activeShells.map((count, idx) => (
             <span
+              role="listitem"
               key={idx}
               className={`px-2 py-0.5 rounded-md font-mono border ${
                 idx === activeShells.length - 1
                   ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 font-bold'
-                  : 'bg-slate-800/80 text-slate-300 border-slate-700/60'
+                  : 'bg-slate-800/80 text-slate-200 border-slate-700/60'
               }`}
               title={`Shell ${SHELL_NAMES[idx] || idx + 1}: ${count} electrons`}
+              aria-label={`Shell ${SHELL_NAMES[idx] || idx + 1}: ${count} electrons`}
             >
               {['K', 'L', 'M', 'N', 'O', 'P', 'Q'][idx] || idx + 1}:{count}
             </span>
@@ -533,10 +552,10 @@ export const Atom3D: React.FC<Atom3DProps> = ({
       </div>
 
       {/* Prominent Scientific Accuracy Note */}
-      <div className="flex items-start gap-2 px-4 py-2.5 bg-slate-950/95 border-t border-slate-800/80 text-[11px] text-slate-400">
-        <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-2 px-4 py-2.5 bg-slate-950/95 border-t border-slate-800/80 text-[11px] text-slate-300">
+        <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" aria-hidden="true" />
         <p className="leading-relaxed">
-          <strong className="text-slate-200">{t('atom3D.scientificNoteTitle', 'Educational Bohr-Style Model:')}</strong>{' '}
+          <strong className="text-slate-100">{t('atom3D.scientificNoteTitle', 'Educational Bohr-Style Model:')}</strong>{' '}
           {t('atom3D.scientificNote')}
         </p>
       </div>

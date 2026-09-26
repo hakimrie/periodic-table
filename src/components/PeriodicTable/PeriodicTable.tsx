@@ -66,7 +66,13 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
       if (nextZ !== selectedElement.atomicNumber) {
         e.preventDefault();
         const nextEl = elementsByNumber.get(nextZ);
-        if (nextEl) onSelectElement(nextEl);
+        if (nextEl) {
+          onSelectElement(nextEl);
+          requestAnimationFrame(() => {
+            const tileBtn = document.getElementById(`element-tile-${nextZ}`);
+            tileBtn?.focus();
+          });
+        }
       }
     },
     [selectedElement, onSelectElement]
@@ -78,7 +84,6 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
     <div
       className={`flex flex-col gap-4 select-none ${className}`}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
       role="region"
       aria-label="Interactive Periodic Table of the Elements"
     >
@@ -86,19 +91,19 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
       {trendDef && (
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-900/90 border border-cyan-500/40 rounded-xl shadow-lg">
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" aria-hidden="true" />
             <span className="font-semibold text-sm text-cyan-300">
               {t('trends.trendMode', 'Trend Mode:')} {t(`trends.${trendDef.key}.name`, trendDef.label)} ({trendDef.unit})
             </span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-300">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-slate-200">
             <span className="flex items-center gap-1 bg-slate-800/80 px-2 py-1 rounded border border-slate-700">
-              <ArrowRight className="w-3.5 h-3.5 text-cyan-400" />
+              <ArrowRight className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
               {trendDef.horizontalSummary}
             </span>
             <span className="flex items-center gap-1 bg-slate-800/80 px-2 py-1 rounded border border-slate-700">
-              <ArrowDown className="w-3.5 h-3.5 text-cyan-400" />
+              <ArrowDown className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
               {trendDef.verticalSummary}
             </span>
           </div>
@@ -122,7 +127,8 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
             <div
               key={`group-${groupNum}`}
               style={{ gridRow: 1, gridColumn: groupNum }}
-              className="flex items-start justify-center pt-0 text-[10px] font-mono font-semibold text-slate-500 pointer-events-none"
+              aria-hidden="true"
+              className="flex items-start justify-center pt-0 text-[10px] font-mono font-bold text-slate-400 pointer-events-none select-none"
             >
               {groupNum}
             </div>
@@ -133,7 +139,8 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
             <div
               key={`period-${periodNum}`}
               style={{ gridRow: periodNum, gridColumn: 1 }}
-              className="absolute -left-5 text-[10px] font-mono font-semibold text-slate-500 pointer-events-none"
+              aria-hidden="true"
+              className="absolute -left-5 text-[10px] font-mono font-bold text-slate-400 pointer-events-none select-none"
             >
               {periodNum}
             </div>
@@ -142,6 +149,8 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
           {/* Lanthanide Anchor in main grid (Row 6, Col 3) */}
           <div
             style={{ gridRow: 6, gridColumn: 3 }}
+            role="note"
+            aria-label={`${t('table.lanthanides', 'Lanthanides')} series elements 57 to 71, continued in bottom f-block series`}
             className="flex flex-col items-center justify-center p-1 rounded-lg border border-pink-500/40 bg-pink-500/10 text-pink-300 text-[10px] font-mono text-center"
             title={`${t('table.lanthanides', 'Lanthanides')} (57–71)`}
           >
@@ -153,6 +162,8 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
           {/* Actinide Anchor in main grid (Row 7, Col 3) */}
           <div
             style={{ gridRow: 7, gridColumn: 3 }}
+            role="note"
+            aria-label={`${t('table.actinides', 'Actinides')} series elements 89 to 103, continued in bottom f-block series`}
             className="flex flex-col items-center justify-center p-1 rounded-lg border border-fuchsia-500/40 bg-fuchsia-500/10 text-fuchsia-300 text-[10px] font-mono text-center"
             title={`${t('table.actinides', 'Actinides')} (89–103)`}
           >
@@ -164,7 +175,8 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
           {/* F-Block Series Label: Lanthanides (Row 9, Col 2-3) */}
           <div
             style={{ gridRow: 9, gridColumn: '2 / span 2' }}
-            className="flex items-center justify-end pr-2 text-xs font-semibold text-pink-400 font-mono"
+            aria-hidden="true"
+            className="flex items-center justify-end pr-2 text-xs font-bold text-pink-400 font-mono"
           >
             * {t('table.lanthanides', 'Lanthanides')}
           </div>
@@ -172,7 +184,8 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
           {/* F-Block Series Label: Actinides (Row 10, Col 2-3) */}
           <div
             style={{ gridRow: 10, gridColumn: '2 / span 2' }}
-            className="flex items-center justify-end pr-2 text-xs font-semibold text-fuchsia-400 font-mono"
+            aria-hidden="true"
+            className="flex items-center justify-end pr-2 text-xs font-bold text-fuchsia-400 font-mono"
           >
             ** {t('table.actinides', 'Actinides')}
           </div>
@@ -215,8 +228,12 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
       </div>
 
       {/* Category Legend & Filter Bar */}
-      <div className="flex flex-wrap items-center gap-2 p-3 bg-slate-900/70 border border-slate-800 rounded-xl text-xs">
-        <span className="text-slate-400 font-medium mr-1">{t('table.categories', 'Categories:')}</span>
+      <div
+        role="group"
+        aria-label={t('table.legend', 'Element Categories')}
+        className="flex flex-wrap items-center gap-2 p-3 bg-slate-900/70 border border-slate-800 rounded-xl text-xs"
+      >
+        <span className="text-slate-300 font-medium mr-1">{t('table.categories', 'Categories:')}</span>
         {(Object.keys(categoryMetadata) as ElementCategory[]).map((catKey) => {
           const meta = categoryMetadata[catKey];
           const isFilterActive = highlightedCategory === catKey;
@@ -225,7 +242,10 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
           return (
             <button
               key={catKey}
+              type="button"
               data-category-tag={catKey}
+              aria-pressed={isFilterActive}
+              aria-label={`${localizedName} filter: ${meta.description}`}
               onClick={() => onSelectCategory && onSelectCategory(isFilterActive ? null : catKey)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all ${
                 isFilterActive
@@ -242,6 +262,7 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ backgroundColor: meta.colorBorder }}
+                aria-hidden="true"
               />
               <span>{localizedName}</span>
             </button>
@@ -250,8 +271,10 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
 
         {highlightedCategory && (
           <button
+            type="button"
             onClick={() => onSelectCategory && onSelectCategory(null)}
-            className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-400 font-medium transition-colors ml-auto"
+            aria-label={t('table.clearFilter', 'Clear Filter')}
+            className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-medium transition-colors ml-auto"
           >
             {t('table.clearFilter', 'Clear Filter')}
           </button>
@@ -259,35 +282,40 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
       </div>
 
       {/* Fixed-Height Stable Preview & Status Bar (prevents layout shifts on hover) */}
-      <div className="h-9 px-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs overflow-hidden shrink-0 transition-colors">
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="h-9 px-3 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs overflow-hidden shrink-0 transition-colors"
+      >
         {hoveredElement ? (
-          <div className="flex items-center gap-2.5 text-slate-300 overflow-hidden truncate">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
-            <span className="text-slate-400 font-medium shrink-0">{t('table.quickPreview', 'Preview:')}</span>
+          <div className="flex items-center gap-2.5 text-slate-200 overflow-hidden truncate">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" aria-hidden="true" />
+            <span className="text-slate-300 font-medium shrink-0">{t('table.quickPreview', 'Preview:')}</span>
             <span className="font-bold text-slate-100 shrink-0">{getLocalizedElementName(hoveredElement.atomicNumber, lang) || hoveredElement.name}</span>
-            <span className="font-mono text-cyan-400 font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 shrink-0">
+            <span className="font-mono text-cyan-300 font-bold px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 shrink-0">
               {hoveredElement.symbol}
             </span>
-            <span className="font-mono text-slate-400 shrink-0">Z={hoveredElement.atomicNumber}</span>
-            <span className="text-slate-600 hidden sm:inline">•</span>
-            <span className="text-slate-300 hidden sm:inline shrink-0">{t(`categories.${hoveredElement.category}`, categoryMetadata[hoveredElement.category]?.name)}</span>
-            <span className="text-slate-600 hidden md:inline">•</span>
-            <span className="text-slate-400 font-mono hidden md:inline shrink-0">{hoveredElement.atomicMassString} u</span>
-            <span className="text-slate-600 hidden lg:inline">•</span>
-            <span className="text-slate-400 font-mono hidden lg:inline shrink-0">{hoveredElement.electronConfiguration.shorthand}</span>
-            <span className="text-slate-600 hidden xl:inline">•</span>
-            <span className="text-slate-400 hidden xl:inline capitalize shrink-0">{t(`phase.${hoveredElement.phaseAtSTP}`, hoveredElement.phaseAtSTP)}</span>
+            <span className="font-mono text-slate-300 shrink-0">Z={hoveredElement.atomicNumber}</span>
+            <span className="text-slate-500 hidden sm:inline" aria-hidden="true">•</span>
+            <span className="text-slate-200 hidden sm:inline shrink-0">{t(`categories.${hoveredElement.category}`, categoryMetadata[hoveredElement.category]?.name)}</span>
+            <span className="text-slate-500 hidden md:inline" aria-hidden="true">•</span>
+            <span className="text-slate-300 font-mono hidden md:inline shrink-0">{hoveredElement.atomicMassString} u</span>
+            <span className="text-slate-500 hidden lg:inline" aria-hidden="true">•</span>
+            <span className="text-slate-300 font-mono hidden lg:inline shrink-0">{hoveredElement.electronConfiguration.shorthand}</span>
+            <span className="text-slate-500 hidden xl:inline" aria-hidden="true">•</span>
+            <span className="text-slate-300 hidden xl:inline capitalize shrink-0">{t(`phase.${hoveredElement.phaseAtSTP}`, hoveredElement.phaseAtSTP)}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-slate-400 text-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-slate-500/60 animate-pulse shrink-0" />
+          <div className="flex items-center gap-2 text-slate-300 text-xs">
+            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-pulse shrink-0" aria-hidden="true" />
             <span className="truncate">{t('table.hoverHint')}</span>
           </div>
         )}
 
-        <div className="text-[11px] text-slate-400 shrink-0 ml-4 hidden sm:flex items-center gap-1.5">
+        <div className="text-[11px] text-slate-300 shrink-0 ml-4 hidden sm:flex items-center gap-1.5">
           <span className="text-slate-400">{t('table.selected', 'Selected:')}</span>
-          <span className="font-bold text-cyan-400">{getLocalizedElementName(selectedElement.atomicNumber, lang) || selectedElement.name} ({selectedElement.symbol})</span>
+          <span className="font-bold text-cyan-300">{getLocalizedElementName(selectedElement.atomicNumber, lang) || selectedElement.name} ({selectedElement.symbol})</span>
         </div>
       </div>
     </div>

@@ -10,6 +10,13 @@
     "highSchoolMode": "SMA",
     "universityMode": "Universitas",
     "quickRefMode": "Referensi Cepat",
+    "skipToContent": "Lompat ke konten utama",
+    "clearSearch": "Hapus input pencarian",
+    "searchResults": "Ditemukan unsur yang cocok",
+    "closeDialog": "Tutup dialog",
+    "favoriteAdd": "Tambahkan ke favorit",
+    "favoriteRemove": "Hapus dari favorit",
+    "mainNav": "Navigasi utama",
     "footerTitle": "Aplikasi Pembelajaran Tabel Periodik Interaktif — Dirancang untuk pendidikan kimia SMA & universitas.",
     "footerDesc": "Data ilmiah dihimpun dari IUPAC (Tabel Periodik 2024), Laboratorium Pengukuran Fisika NIST, dan PubChem. Seluruh 118 unsur kimia telah diverifikasi nomor atom, kulit elektron, massa atom, dan hubungan periodiknya."
   },

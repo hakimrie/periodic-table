@@ -96,11 +96,12 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
           <div className="flex items-center gap-1.5">
             {prevElement && (
               <button
+                type="button"
                 onClick={() => onSelectElement(prevElement)}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-colors"
-                title={`${getLocalizedElementName(prevElement.atomicNumber, lang) || prevElement.name} (${prevElement.symbol})`}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-200 border border-slate-700/60 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
+                aria-label={`Previous element: ${getLocalizedElementName(prevElement.atomicNumber, lang) || prevElement.name} (${prevElement.symbol}, Z=${prevElement.atomicNumber})`}
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="hidden sm:inline">{getLocalizedElementName(prevElement.atomicNumber, lang) || prevElement.name}</span>
                 <span className="font-mono">({prevElement.atomicNumber})</span>
               </button>
@@ -108,13 +109,14 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
 
             {nextElement && (
               <button
+                type="button"
                 onClick={() => onSelectElement(nextElement)}
-                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-700/60 transition-colors"
-                title={`${getLocalizedElementName(nextElement.atomicNumber, lang) || nextElement.name} (${nextElement.symbol})`}
+                className="flex items-center gap-1 px-2.5 py-1 text-xs rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-200 border border-slate-700/60 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
+                aria-label={`Next element: ${getLocalizedElementName(nextElement.atomicNumber, lang) || nextElement.name} (${nextElement.symbol}, Z=${nextElement.atomicNumber})`}
               >
                 <span className="hidden sm:inline">{getLocalizedElementName(nextElement.atomicNumber, lang) || nextElement.name}</span>
                 <span className="font-mono">({nextElement.atomicNumber})</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -122,68 +124,79 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
           {/* Educational Mode & Utilities */}
           <div className="flex items-center gap-2">
             {/* Mode switch */}
-            <div className="flex items-center bg-slate-900/80 p-0.5 rounded-lg border border-slate-700/60 text-xs shadow-inner">
+            <div role="group" aria-label="Educational mode" className="flex items-center bg-slate-900/80 p-0.5 rounded-lg border border-slate-700/60 text-xs shadow-inner">
               <button
+                type="button"
                 onClick={() => onModeChange('high-school')}
-                className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                aria-pressed={educationalMode === 'high-school'}
+                className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                   educationalMode === 'high-school'
                     ? 'bg-cyan-500 text-slate-950 font-bold shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-300 hover:text-white'
                 }`}
                 title={t('help.highSchoolDesc')}
               >
-                <GraduationCap className="w-3.5 h-3.5" />
+                <GraduationCap className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{t('app.highSchoolMode', 'High School')}</span>
               </button>
               <button
+                type="button"
                 onClick={() => onModeChange('university')}
-                className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                aria-pressed={educationalMode === 'university'}
+                className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-purple-400 ${
                   educationalMode === 'university'
                     ? 'bg-purple-600 text-white font-bold shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-300 hover:text-white'
                 }`}
                 title={t('help.universityDesc')}
               >
-                <Microscope className="w-3.5 h-3.5" />
+                <Microscope className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{t('app.universityMode', 'University')}</span>
               </button>
               <button
+                type="button"
                 onClick={() => onModeChange('quick-reference')}
-                className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 ${
+                aria-pressed={educationalMode === 'quick-reference'}
+                className={`px-2.5 py-1 rounded-md transition-all flex items-center gap-1.5 focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                   educationalMode === 'quick-reference'
                     ? 'bg-emerald-500 text-slate-950 font-bold shadow'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-300 hover:text-white'
                 }`}
                 title={t('help.quickRefDesc')}
               >
-                <Zap className="w-3.5 h-3.5" />
+                <Zap className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>{t('app.quickRefMode', 'Quick Ref')}</span>
               </button>
             </div>
 
             {/* Favorite button */}
             <button
+              type="button"
               onClick={onToggleFavorite}
-              className={`p-2 rounded-lg border transition-all ${
+              aria-pressed={isFavorite}
+              aria-label={isFavorite ? t('favoriteRemove', 'Remove from favorites') : t('favoriteAdd', 'Add to favorites')}
+              className={`p-2 rounded-lg border transition-all focus-visible:ring-2 focus-visible:ring-cyan-400 ${
                 isFavorite
                   ? 'bg-amber-500/20 text-amber-400 border-amber-500/40'
-                  : 'bg-slate-900/60 text-slate-400 hover:text-slate-200 border-slate-700/60'
+                  : 'bg-slate-900/60 text-slate-300 hover:text-white border-slate-700/60'
               }`}
-              title={isFavorite ? t('nav.favorites') : t('nav.favorites')}
+              title={isFavorite ? t('favoriteRemove', 'Remove from favorites') : t('favoriteAdd', 'Add to favorites')}
             >
-              <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-amber-400' : ''}`} />
+              <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-amber-400' : ''}`} aria-hidden="true" />
             </button>
 
             {/* Share button */}
             <button
+              type="button"
               onClick={handleShare}
-              className="flex items-center gap-1.5 p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/60 transition-colors"
+              aria-label={copiedShare ? t('element.linkCopied', 'Link copied to clipboard') : t('element.copyShare', 'Share / Copy Link')}
+              className="flex items-center gap-1.5 p-2 rounded-lg bg-slate-900/60 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/60 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
               title={t('element.copyShare', 'Share / Copy Link')}
             >
               {copiedShare ? (
-                <Check className="w-4 h-4 text-emerald-400" />
+                <Check className="w-4 h-4 text-emerald-400" aria-hidden="true" />
               ) : (
-                <Share2 className="w-4 h-4" />
+                <Share2 className="w-4 h-4" aria-hidden="true" />
               )}
             </button>
           </div>
@@ -373,13 +386,16 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
                   {t('mode.physicalConstants', 'Physical Constants')}
                 </h3>
                 {/* Temp Switch */}
-                <div className="flex items-center bg-slate-950 px-1 py-0.5 rounded border border-slate-800 text-[10px] font-mono">
+                <div role="group" aria-label="Temperature unit" className="flex items-center bg-slate-950 px-1 py-0.5 rounded border border-slate-800 text-[10px] font-mono">
                   {(['K', 'C', 'F'] as TemperatureUnit[]).map((u) => (
                     <button
+                      type="button"
                       key={u}
                       onClick={() => onTempUnitChange(u)}
-                      className={`px-1.5 py-0.5 rounded ${
-                        tempUnit === u ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400'
+                      aria-pressed={tempUnit === u}
+                      aria-label={`Degrees ${u}`}
+                      className={`px-1.5 py-0.5 rounded transition-colors focus-visible:ring-1 focus-visible:ring-cyan-400 ${
+                        tempUnit === u ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
                       }`}
                     >
                       °{u}
@@ -390,29 +406,29 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
               <table className="w-full text-xs">
                 <tbody className="divide-y divide-slate-800/60 font-mono">
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.phase', 'Phase at STP')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.phase', 'Phase at STP')}</th>
                     <td className="py-2 text-right text-slate-200 capitalize font-bold">{t(`phase.${displayElement.physicalProperties.phase}`, displayElement.physicalProperties.phase)}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.density', 'Density')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.density', 'Density')}</th>
                     <td className="py-2 text-right text-slate-200">
                       {displayElement.physicalProperties.density !== undefined ? `${displayElement.physicalProperties.density} ${displayElement.physicalProperties.densityUnit || 'g/cm³'}` : 'N/A'}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.meltingPoint', 'Melting Point')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.meltingPoint', 'Melting Point')}</th>
                     <td className="py-2 text-right text-slate-200">{convertTemperature(displayElement.physicalProperties.meltingPointKelvin, tempUnit)}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.boilingPoint', 'Boiling Point')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.boilingPoint', 'Boiling Point')}</th>
                     <td className="py-2 text-right text-slate-200">{convertTemperature(displayElement.physicalProperties.boilingPointKelvin, tempUnit)}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.crystalStructure', 'Crystal Structure')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.crystalStructure', 'Crystal Structure')}</th>
                     <td className="py-2 text-right text-slate-200 uppercase">{displayElement.physicalProperties.crystalStructure || 'N/A'}</td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.mohsHardness', 'Mohs Hardness')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.mohsHardness', 'Mohs Hardness')}</th>
                     <td className="py-2 text-right text-slate-200">{displayElement.physicalProperties.mohsHardness ?? 'N/A'}</td>
                   </tr>
                 </tbody>
@@ -423,38 +439,38 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
             <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-lg">
               <div className="pb-2.5 border-b border-slate-800 mb-3">
                 <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5" />
+                  <Zap className="w-3.5 h-3.5" aria-hidden="true" />
                   {t('mode.chemicalConstants', 'Chemical & Thermodynamic Constants')}
                 </h3>
               </div>
               <table className="w-full text-xs">
                 <tbody className="divide-y divide-slate-800/60 font-mono">
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.electronegativity', 'Electronegativity')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.electronegativity', 'Electronegativity')}</th>
                     <td className="py-2 text-right text-slate-200">
                       {displayElement.chemicalProperties.electronegativity !== undefined ? `${displayElement.chemicalProperties.electronegativity} (Pauling)` : 'N/A'}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.firstIonizationEnergy', '1st Ionization Energy')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.firstIonizationEnergy', '1st Ionization Energy')}</th>
                     <td className="py-2 text-right text-slate-200">
                       {displayElement.chemicalProperties.firstIonizationEnergy !== undefined ? `${displayElement.chemicalProperties.firstIonizationEnergy} kJ/mol` : 'N/A'}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.electronAffinity', 'Electron Affinity')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.electronAffinity', 'Electron Affinity')}</th>
                     <td className="py-2 text-right text-slate-200">
                       {displayElement.chemicalProperties.electronAffinity !== undefined ? `${displayElement.chemicalProperties.electronAffinity} kJ/mol` : 'N/A'}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.atomicRadius', 'Atomic Radius')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.atomicRadius', 'Atomic Radius')}</th>
                     <td className="py-2 text-right text-slate-200">
                       {displayElement.chemicalProperties.atomicRadius !== undefined ? `${displayElement.chemicalProperties.atomicRadius} pm` : 'N/A'}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.mainOxidationState', 'Primary State')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.mainOxidationState', 'Primary State')}</th>
                     <td className="py-2 text-right font-bold text-cyan-300">
                       {displayElement.chemicalProperties.mainOxidationState !== undefined
                         ? (displayElement.chemicalProperties.mainOxidationState > 0 ? `+${displayElement.chemicalProperties.mainOxidationState}` : displayElement.chemicalProperties.mainOxidationState)
@@ -462,7 +478,7 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2 text-slate-400 font-sans">{t('element.oxidationStates', 'All Oxidation States')}</td>
+                    <th scope="row" className="py-2 text-left font-normal text-slate-300 font-sans">{t('element.oxidationStates', 'All Oxidation States')}</th>
                     <td className="py-2 text-right text-slate-200">
                       {displayElement.chemicalProperties.oxidationStates.map(o => o > 0 ? `+${o}` : o).join(', ') || 'None'}
                     </td>
@@ -607,17 +623,20 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
                 {/* Expandable deeper mechanics for curious high school students */}
                 <div className="pt-1">
                   <button
+                    type="button"
                     onClick={() => setShowDeepMechanics(!showDeepMechanics)}
-                    className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 text-xs transition-colors"
+                    aria-expanded={showDeepMechanics}
+                    aria-controls="deep-mechanics-panel"
+                    className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-950/60 hover:bg-slate-950 border border-slate-800 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-pink-400"
                   >
                     <span className="flex items-center gap-2 text-pink-300 font-semibold">
-                      <Atom className="w-4 h-4" />
+                      <Atom className="w-4 h-4" aria-hidden="true" />
                       {t('mode.deeperMechanics', 'Want to go deeper? (Quantum Subshell Mechanics)')}
                     </span>
-                    {showDeepMechanics ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                    {showDeepMechanics ? <ChevronUp className="w-4 h-4 text-slate-400" aria-hidden="true" /> : <ChevronDown className="w-4 h-4 text-slate-400" aria-hidden="true" />}
                   </button>
                   {showDeepMechanics && (
-                    <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-sm text-slate-300 leading-relaxed mt-2 animate-fade-in">
+                    <div id="deep-mechanics-panel" className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-sm text-slate-300 leading-relaxed mt-2 animate-fade-in">
                       <h4 className="text-xs font-semibold text-pink-300 uppercase tracking-wider mb-1.5">
                         {t('element.whyItBehaves', 'Why It Behaves This Way')}
                       </h4>
@@ -696,14 +715,17 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
 
             <div>
               <button
+                type="button"
                 onClick={() => setShowFullConfigInHighSchool(!showFullConfigInHighSchool)}
-                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-slate-950/60 transition-colors"
+                aria-expanded={showFullConfigInHighSchool}
+                aria-controls="full-config-high-school-panel"
+                className="text-xs text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-slate-950/60 transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400"
               >
                 <span>{showFullConfigInHighSchool ? t('mode.hideFullConfig', 'Hide full subshell configuration') : t('mode.fullConfigToggle', 'Show full subshell configuration')}</span>
-                {showFullConfigInHighSchool ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                {showFullConfigInHighSchool ? <ChevronUp className="w-3.5 h-3.5" aria-hidden="true" /> : <ChevronDown className="w-3.5 h-3.5" aria-hidden="true" />}
               </button>
               {showFullConfigInHighSchool && (
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 font-mono text-xs text-slate-200 mt-2 animate-fade-in break-words">
+                <div id="full-config-high-school-panel" className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 font-mono text-xs text-slate-200 mt-2 animate-fade-in break-words">
                   {element.electronConfiguration.full}
                 </div>
               )}
@@ -778,13 +800,16 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
             </h2>
 
             {/* Temperature unit switch */}
-            <div className="flex items-center bg-slate-950 px-1 py-0.5 rounded-lg border border-slate-800 text-[11px] font-mono">
+            <div role="group" aria-label="Temperature unit" className="flex items-center bg-slate-950 px-1 py-0.5 rounded-lg border border-slate-800 text-[11px] font-mono">
               {(['K', 'C', 'F'] as TemperatureUnit[]).map((u) => (
                 <button
+                  type="button"
                   key={u}
                   onClick={() => onTempUnitChange(u)}
-                  className={`px-1.5 py-0.5 rounded ${
-                    tempUnit === u ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400'
+                  aria-pressed={tempUnit === u}
+                  aria-label={`Degrees ${u}`}
+                  className={`px-1.5 py-0.5 rounded transition-colors focus-visible:ring-1 focus-visible:ring-cyan-400 ${
+                    tempUnit === u ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-white'
                   }`}
                 >
                   °{u}
@@ -950,11 +975,14 @@ export const ElementDetails: React.FC<ElementDetailsProps> = ({
 
                       {onSelectIon && (
                         <button
+                          type="button"
                           onClick={() => onSelectIon(isSelected ? null : ion)}
-                          className={`text-xs px-2.5 py-1 rounded font-medium transition-colors ${
+                          aria-pressed={isSelected}
+                          aria-label={isSelected ? `Viewing ion ${ion.formula} in 3D` : `Simulate ion ${ion.formula} in 3D`}
+                          className={`text-xs px-2.5 py-1 rounded font-medium transition-colors focus-visible:ring-2 focus-visible:ring-pink-400 ${
                             isSelected
                               ? 'bg-pink-600 text-white'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                              : 'bg-slate-800 text-slate-200 hover:bg-slate-700'
                           }`}
                         >
                           {isSelected ? t('element.viewingIn3D', 'Viewing in 3D') : t('element.simulateIn3D', 'Simulate in 3D')}

@@ -78,38 +78,48 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl">
         <div>
-          <h2 className="text-xl font-bold flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-amber-400" />
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-amber-400" aria-hidden="true" />
             <span>{t('quiz.title', 'Chemistry Mastery Quiz')}</span>
-          </h2>
-          <p className="text-xs text-slate-400 mt-0.5">
+          </h1>
+          <p className="text-xs text-slate-300 mt-0.5">
             {t('quiz.subtitle', 'Test your knowledge of elements, electron configurations, trends, and properties')}
           </p>
         </div>
 
         {/* Difficulty Filter */}
-        <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs">
-          <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
+        <div
+          role="group"
+          aria-label={t('quiz.difficultyFilter', 'Quiz difficulty')}
+          className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs"
+        >
+          <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" aria-hidden="true" />
           <button
+            type="button"
+            aria-pressed={difficultyFilter === 'all'}
             onClick={() => handleDifficultyChange('all')}
             className={`px-2.5 py-1 rounded-lg transition-colors ${
-              difficultyFilter === 'all' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+              difficultyFilter === 'all' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-slate-100'
             }`}
           >
             {t('quiz.allDifficulties', 'All')}
           </button>
           <button
+            type="button"
+            aria-pressed={difficultyFilter === 'high-school'}
             onClick={() => handleDifficultyChange('high-school')}
             className={`px-2.5 py-1 rounded-lg transition-colors ${
-              difficultyFilter === 'high-school' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+              difficultyFilter === 'high-school' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-slate-100'
             }`}
           >
             {t('quiz.highSchool', 'High School')}
           </button>
           <button
+            type="button"
+            aria-pressed={difficultyFilter === 'university'}
             onClick={() => handleDifficultyChange('university')}
             className={`px-2.5 py-1 rounded-lg transition-colors ${
-              difficultyFilter === 'university' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-slate-200'
+              difficultyFilter === 'university' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-300 hover:text-slate-100'
             }`}
           >
             {t('quiz.university', 'University')}
@@ -121,17 +131,24 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
       {!isCompleted ? (
         <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl space-y-6">
           {/* Progress bar & Current Score */}
-          <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+          <div className="flex items-center justify-between text-xs text-slate-300 font-mono">
             <span>
-              {t('quiz.question', 'Question')} <strong className="text-cyan-400">{currentIndex + 1}</strong> {t('quiz.of', 'of')} {questions.length}
+              {t('quiz.question', 'Question')} <strong className="text-cyan-300">{currentIndex + 1}</strong> {t('quiz.of', 'of')} {questions.length}
             </span>
             <span className="flex items-center gap-1.5">
-              <Award className="w-4 h-4 text-amber-400" />
+              <Award className="w-4 h-4 text-amber-400" aria-hidden="true" />
               <span>{t('quiz.score', 'Score:')} <strong className="text-slate-100">{score}</strong></span>
             </span>
           </div>
 
-          <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+          <div
+            role="progressbar"
+            aria-valuenow={currentIndex + 1}
+            aria-valuemin={1}
+            aria-valuemax={questions.length}
+            aria-label={t('quiz.progress', 'Quiz progress')}
+            className="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800"
+          >
             <div
               className="bg-cyan-500 h-full transition-all duration-300 rounded-full"
               style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
@@ -140,16 +157,16 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
 
           {/* Question Text */}
           <div className="py-2">
-            <span className="text-xs uppercase tracking-wider text-slate-500 font-semibold block mb-1">
+            <span className="text-xs uppercase tracking-wider text-slate-400 font-semibold block mb-1">
               Category: {currentQ.category.replace(/-/g, ' ')} • {currentQ.difficulty}
             </span>
-            <h3 className="text-lg sm:text-xl font-semibold text-slate-100 leading-snug">
+            <h2 id={`quiz-q-${currentIndex}`} className="text-lg sm:text-xl font-semibold text-slate-100 leading-snug">
               {currentQ.question}
-            </h3>
+            </h2>
           </div>
 
           {/* Options */}
-          <div className="space-y-2.5">
+          <div role="radiogroup" aria-labelledby={`quiz-q-${currentIndex}`} className="space-y-2.5">
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedAnswer === idx;
               let optionClass = 'bg-slate-950/70 border-slate-800 text-slate-200 hover:border-slate-700';
@@ -167,22 +184,25 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
               return (
                 <button
                   key={idx}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
                   onClick={() => handleSelectOption(idx)}
                   disabled={isAnswerSubmitted}
                   className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-center justify-between text-sm ${optionClass}`}
                 >
                   <span className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center font-mono text-xs text-slate-400">
+                    <span className="w-6 h-6 rounded-lg bg-slate-900 border border-slate-700 flex items-center justify-center font-mono text-xs text-slate-300 font-bold" aria-hidden="true">
                       {String.fromCharCode(65 + idx)}
                     </span>
                     <span>{opt}</span>
                   </span>
 
                   {isAnswerSubmitted && idx === currentQ.correctIndex && (
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" aria-label="Correct answer" />
                   )}
                   {isAnswerSubmitted && isSelected && idx !== currentQ.correctIndex && (
-                    <XCircle className="w-5 h-5 text-rose-400 shrink-0" />
+                    <XCircle className="w-5 h-5 text-rose-400 shrink-0" aria-label="Incorrect answer" />
                   )}
                 </button>
               );
@@ -191,19 +211,25 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
 
           {/* Immediate Educational Explanation */}
           {isAnswerSubmitted && (
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 animate-fade-in">
+            <div
+              role="region"
+              aria-live="polite"
+              aria-atomic="true"
+              className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 animate-fade-in"
+            >
               <div className="flex items-center gap-2 font-semibold text-xs text-cyan-300">
-                <BookOpen className="w-4 h-4 text-cyan-400" />
+                <BookOpen className="w-4 h-4 text-cyan-400" aria-hidden="true" />
                 <span>{t('quiz.explanation', 'Scientific Explanation:')}</span>
               </div>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
                 {currentQ.explanation}
               </p>
 
               {currentQ.relatedElementId && onSelectElementById && (
                 <button
+                  type="button"
                   onClick={() => onSelectElementById(currentQ.relatedElementId!)}
-                  className="text-xs text-cyan-400 hover:text-cyan-300 underline font-medium pt-1 block"
+                  className="text-xs text-cyan-300 hover:text-cyan-200 underline font-medium pt-1 block"
                 >
                   {lang === 'id' ? `Buka Detail Unsur #${currentQ.relatedElementId} →` : `Open Element #${currentQ.relatedElementId} Details →`}
                 </button>
@@ -215,6 +241,7 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
           <div className="flex items-center justify-end gap-3 pt-2">
             {!isAnswerSubmitted ? (
               <button
+                type="button"
                 onClick={handleSubmitAnswer}
                 disabled={selectedAnswer === null}
                 className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/20"
@@ -223,11 +250,12 @@ export const QuizMode: React.FC<QuizModeProps> = ({ onSelectElementById, classNa
               </button>
             ) : (
               <button
+                type="button"
                 onClick={handleNextQuestion}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-sm transition-all shadow-lg shadow-cyan-500/20"
               >
                 <span>{currentIndex + 1 < questions.length ? t('quiz.next', 'Next Question') : t('quiz.next', 'View Results')}</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
               </button>
             )}
           </div>
