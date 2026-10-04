@@ -4,6 +4,8 @@ An interactive, production-quality Periodic Table application and atomic visuali
 
 Built with **React 19, TypeScript, Tailwind CSS, Vite 8, and Three.js**, this application goes beyond static charts to deliver a comprehensive learning platform: 3D subatomic modeling, quantum orbital spin diagrams, periodic trends heatmaps, comparative element analysis, and deterministic quiz evaluation.
 
+> 🌐 **Live Demo & Experiments Portal:** Part of the interactive experiments suite hosted at [experiment.bukuanak.id](https://experiment.bukuanak.id/). Explore all interactive science and education experiments there.
+
 ---
 
 ## 🌟 Key Features

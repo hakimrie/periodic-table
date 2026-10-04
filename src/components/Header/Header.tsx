@@ -14,6 +14,7 @@ import {
   GraduationCap,
   X,
   Globe,
+  ExternalLink,
 } from 'lucide-react';
 import type { ElementFilterOptions } from '../../data/elements';
 import { useI18n } from '../../utils/i18n';
@@ -300,6 +301,19 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <HelpCircle className="w-4 h-4 text-slate-300" aria-hidden="true" />
           </button>
+
+          {/* All Experiments Portal Link */}
+          <a
+            href="https://experiment.bukuanak.id/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={t('app.backToExperiments', 'Explore all interactive experiments')}
+            className="px-2.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 transition-all flex items-center gap-1.5 text-xs font-medium group"
+            title={t('app.backToExperiments', 'Explore all interactive experiments')}
+          >
+            <span className="hidden sm:inline">{t('app.allExperiments', 'All Experiments')}</span>
+            <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
+          </a>
         </div>
       </div>
 

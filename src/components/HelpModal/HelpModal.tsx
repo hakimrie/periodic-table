@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { X, BookOpen, Info, Keyboard } from 'lucide-react';
+import { X, BookOpen, Info, Keyboard, ExternalLink } from 'lucide-react';
 import { useI18n } from '../../utils/i18n';
 
 interface HelpModalProps {
@@ -159,12 +159,26 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Section 4: Data Sources */}
-        <div className="space-y-2 text-xs text-slate-300 border-t border-slate-800 pt-4">
-          <strong className="text-slate-200 block">{t('element.sources', 'Scientific sources')}:</strong>
-          <p className="leading-relaxed">
-            Data verified against IUPAC (International Union of Pure and Applied Chemistry 2024 Release), NIST Physical Measurement Laboratory, WebElements, and PubChem database.
-          </p>
+        {/* Section 4: Data Sources & Experiments */}
+        <div className="space-y-3 text-xs text-slate-300 border-t border-slate-800 pt-4">
+          <div>
+            <strong className="text-slate-200 block mb-1">{t('element.sources', 'Scientific sources')}:</strong>
+            <p className="leading-relaxed">
+              Data verified against IUPAC (International Union of Pure and Applied Chemistry 2024 Release), NIST Physical Measurement Laboratory, WebElements, and PubChem database.
+            </p>
+          </div>
+          <div className="pt-2 border-t border-slate-800/60 flex items-center justify-between flex-wrap gap-2">
+            <span className="text-slate-400">Bukuanak Interactive Science Series:</span>
+            <a
+              href="https://experiment.bukuanak.id/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-cyan-400 hover:text-cyan-300 font-medium underline underline-offset-2 hover:no-underline"
+            >
+              <span>{t('app.backToExperiments', 'Explore all interactive experiments')}</span>
+              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </div>
     </div>

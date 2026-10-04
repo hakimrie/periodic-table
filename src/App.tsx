@@ -20,7 +20,7 @@ import { QuizMode } from './components/Quiz/QuizMode';
 import { HelpModal } from './components/HelpModal/HelpModal';
 import { useI18n } from './utils/i18n';
 import { parseElementFromPath } from './utils/url';
-import { Microscope, Layers } from 'lucide-react';
+import { Microscope, Layers, ExternalLink } from 'lucide-react';
 
 export function App() {
   const { lang, setLang, t } = useI18n();
@@ -379,6 +379,18 @@ export function App() {
           <p className="text-[11px] text-slate-600">
             {t('app.footerDesc', 'Scientific data compiled from IUPAC (2024 Periodic Table), NIST Physical Measurement Laboratory, and PubChem. All 118 chemical elements verified for atomic numbers, electron shells, masses, and periodic relationships.')}
           </p>
+          <div className="pt-2">
+            <a
+              href="https://experiment.bukuanak.id/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-cyan-400 hover:text-cyan-300 transition-colors py-1 px-3 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800"
+            >
+              <span>{t('app.backToExperiments', 'Explore all interactive experiments')}</span>
+              <span className="text-slate-400 font-mono text-[11px]">(experiment.bukuanak.id)</span>
+              <ExternalLink className="w-3.5 h-3.5 ml-0.5" aria-hidden="true" />
+            </a>
+          </div>
         </div>
       </footer>
 
