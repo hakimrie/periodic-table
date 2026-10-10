@@ -24,6 +24,10 @@
   },
   "nav": {
     "table": "Tabel Periodik",
+    "skyline": "Skyline 3D",
+    "orbitals": "Lab Orbital",
+    "spectra": "Spektrum & Nyala",
+    "lab": "Lab Molekul",
     "trends": "Tren Periodik",
     "compare": "Bandingkan Unsur",
     "quiz": "Kuis Pembelajaran",

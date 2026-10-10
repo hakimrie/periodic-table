@@ -10,9 +10,39 @@ export interface I18nContextType {
   t: (path: string, fallback?: string) => string;
 }
 
+export type TranslationBundle = Record<LanguageCode, Record<string, any>>;
+
+function deepMerge(target: any, source: any): any {
+  const out: any = Array.isArray(target) ? [...target] : { ...target };
+  for (const key of Object.keys(source || {})) {
+    const sv = source[key];
+    if (sv && typeof sv === 'object' && !Array.isArray(sv) && typeof out[key] === 'object') {
+      out[key] = deepMerge(out[key], sv);
+    } else {
+      out[key] = sv;
+    }
+  }
+  return out;
+}
+
+// Feature translation bundles: each file in src/locales/features exports
+// `default { en: {...}, id: {...} }` which is deep-merged into the base dictionaries.
+const featureBundles = import.meta.glob<{ default: TranslationBundle }>('../locales/features/*.ts', {
+  eager: true,
+});
+
+let mergedEn: any = enTranslations;
+let mergedId: any = idTranslations;
+for (const mod of Object.values(featureBundles)) {
+  if (mod?.default) {
+    mergedEn = deepMerge(mergedEn, mod.default.en || {});
+    mergedId = deepMerge(mergedId, mod.default.id || {});
+  }
+}
+
 export const translations: Record<LanguageCode, any> = {
-  en: enTranslations,
-  id: idTranslations,
+  en: mergedEn,
+  id: mergedId,
 };
 
 export function getNestedTranslation(obj: any, path: string, fallback?: string): string {

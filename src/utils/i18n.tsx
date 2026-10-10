@@ -9,6 +9,10 @@ import {
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [lang, setLang] = useState<LanguageCode>(() => {
     try {
+      if (typeof window !== 'undefined') {
+        const param = new URLSearchParams(window.location.search).get('lang');
+        if (param === 'id' || param === 'en') return param;
+      }
       const stored = localStorage.getItem('pt_lang');
       if (stored === 'id' || stored === 'en') return stored;
       if (typeof navigator !== 'undefined' && navigator.language?.startsWith('id')) {

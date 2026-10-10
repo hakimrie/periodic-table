@@ -1,9 +1,25 @@
-import React, { useCallback } from 'react';
-import type { ChemicalElement, ElementCategory, PeriodicTrendKey } from '../../types/element';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
+import type {
+  ChemicalElement,
+  ElementCategory,
+  PeriodicTrendKey,
+  TemperatureUnit,
+} from '../../types/element';
 import { allElements, categoryMetadata, elementsByNumber } from '../../data/elements';
 import { ElementTile } from './ElementTile';
 import { ArrowRight, ArrowDown } from 'lucide-react';
 import { periodicTrends } from '../../data/trends';
+import { getGridPosition } from '../../utils/grid';
+import { useI18n } from '../../utils/i18n';
+import { getLocalizedElementName } from '../../data/elements/translations';
+import {
+  TableLenses,
+  type LensState,
+} from './TableLenses';
+import {
+  getPhaseAtTemperature,
+  parseDiscoveryYear,
+} from './lenses';
 
 interface PeriodicTableProps {
   selectedElement: ChemicalElement;
@@ -14,12 +30,9 @@ interface PeriodicTableProps {
   highlightedCategory?: ElementCategory | null;
   onSelectCategory?: (cat: ElementCategory | null) => void;
   matchedElementIds?: Set<number>;
+  tempUnit?: TemperatureUnit;
   className?: string;
 }
-
-import { getGridPosition } from '../../utils/grid';
-import { useI18n } from '../../utils/i18n';
-import { getLocalizedElementName } from '../../data/elements/translations';
 
 export const PeriodicTable: React.FC<PeriodicTableProps> = ({
   selectedElement,
@@ -30,9 +43,47 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
   highlightedCategory = null,
   onSelectCategory,
   matchedElementIds,
+  tempUnit = 'C',
   className = '',
 }) => {
   const { t, lang } = useI18n();
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+
+  // Internal Lens State (defaults to 'category' unless an activeTrend or ?lens=... is passed)
+  const [lensState, setLensState] = useState<LensState>(() => {
+    let initialLens = activeTrend ? 'trend' : 'category';
+    let initialYear = 2020;
+    try {
+      const urlLens = new URLSearchParams(window.location.search).get('lens');
+      if (urlLens && ['category', 'temperature', 'discovery', 'block', 'origin', 'trend'].includes(urlLens)) {
+        initialLens = urlLens as any;
+        if (urlLens === 'discovery') initialYear = 1869;
+      }
+    } catch {
+      // Ignore URL parsing errors in sandboxed context
+    }
+    return {
+      lens: initialLens as any,
+      temperatureKelvin: 298,
+      isTempPlaying: false,
+      discoveryYear: initialYear,
+      isDiscoveryPlaying: false,
+      activeTrend: activeTrend || 'atomicRadius',
+      highlightedBlock: null,
+      originFilter: null,
+    };
+  });
+
+  // Track pointer for subtle spotlight on the periodic grid
+  const handlePointerMove = (e: React.PointerEvent) => {
+    const el = gridContainerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    el.style.setProperty('--spotlight-x', `${x}px`);
+    el.style.setProperty('--spotlight-y', `${y}px`);
+  };
 
   // Keyboard navigation between elements
   const handleKeyDown = useCallback(
@@ -43,7 +94,6 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
       } else if (e.key === 'ArrowLeft') {
         nextZ = Math.max(1, selectedElement.atomicNumber - 1);
       } else if (e.key === 'ArrowDown') {
-        // Move to element below in period
         const pos = getGridPosition(selectedElement);
         const candidates = allElements.filter((el) => {
           const p = getGridPosition(el);
@@ -78,7 +128,44 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
     [selectedElement, onSelectElement]
   );
 
-  const trendDef = activeTrend ? periodicTrends[activeTrend] : null;
+  // Compute live temperature phase counts
+  const tempCounts = useMemo(() => {
+    let solid = 0;
+    let liquid = 0;
+    let gas = 0;
+    let unknown = 0;
+    for (const el of allElements) {
+      const p = getPhaseAtTemperature(el, lensState.temperatureKelvin);
+      if (p === 'solid') solid++;
+      else if (p === 'liquid') liquid++;
+      else if (p === 'gas') gas++;
+      else unknown++;
+    }
+    return { solid, liquid, gas, unknown };
+  }, [lensState.temperatureKelvin]);
+
+  // Compute live discovery statistics
+  const { discoveredCount, latestDiscoveredNames } = useMemo(() => {
+    let count = 0;
+    const latest: ChemicalElement[] = [];
+    for (const el of allElements) {
+      const y = parseDiscoveryYear(el.discovery.year);
+      if (y <= lensState.discoveryYear) {
+        count++;
+        latest.push(el);
+      }
+    }
+    // Sort descending by discovery year to show newest at this point
+    latest.sort((a, b) => parseDiscoveryYear(b.discovery.year) - parseDiscoveryYear(a.discovery.year));
+    return {
+      discoveredCount: count,
+      latestDiscoveredNames: latest.slice(0, 4).map((e) => `${e.name} (${e.symbol})`),
+    };
+  }, [lensState.discoveryYear]);
+
+  // Determine effective active trend (prop takes precedence if passed)
+  const effectiveTrendKey = activeTrend || (lensState.lens === 'trend' ? lensState.activeTrend : null);
+  const trendDef = effectiveTrendKey ? periodicTrends[effectiveTrendKey] : null;
 
   return (
     <div
@@ -87,6 +174,18 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
       role="region"
       aria-label="Interactive Periodic Table of the Elements"
     >
+      {/* Interactive Lenses Control Bar */}
+      {!activeTrend && (
+        <TableLenses
+          state={lensState}
+          onChange={setLensState}
+          tempCounts={tempCounts}
+          discoveredCount={discoveredCount}
+          latestDiscoveredNames={latestDiscoveredNames}
+          tempUnit={tempUnit}
+        />
+      )}
+
       {/* Trend Directional Summary Banner if Trend mode is active */}
       {trendDef && (
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-slate-900/90 border border-cyan-500/40 rounded-xl shadow-lg">
@@ -110,8 +209,16 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
         </div>
       )}
 
-      {/* Main Grid Wrapper with responsive horizontal scroll */}
-      <div className="overflow-x-auto pb-4 pt-1 rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3 sm:p-5 shadow-inner">
+      {/* Main Grid Wrapper with responsive horizontal scroll and subtle cursor spotlight */}
+      <div
+        ref={gridContainerRef}
+        onPointerMove={handlePointerMove}
+        style={{
+          backgroundImage:
+            'radial-gradient(circle 380px at var(--spotlight-x, -500px) var(--spotlight-y, -500px), rgba(6, 182, 212, 0.08), transparent 70%)',
+        }}
+        className="overflow-x-auto pb-4 pt-1 rounded-2xl bg-slate-950/60 border border-slate-800/80 p-3 sm:p-5 shadow-inner transition-colors"
+      >
         <div
           role="grid"
           aria-rowcount={10}
@@ -195,7 +302,6 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
             const { row, col } = getGridPosition(el);
             const isSelected = selectedElement.atomicNumber === el.atomicNumber;
 
-            // Check if dimmed by category filter or search query
             let isDimmed = false;
             if (highlightedCategory && el.category !== highlightedCategory) {
               isDimmed = true;
@@ -218,8 +324,13 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
                   isSelected={isSelected}
                   onSelect={onSelectElement}
                   onHover={onHoverElement}
-                  activeTrend={activeTrend}
+                  activeTrend={effectiveTrendKey}
                   dimmed={isDimmed}
+                  lens={lensState.lens}
+                  temperatureKelvin={lensState.temperatureKelvin}
+                  discoveryYear={lensState.discoveryYear}
+                  highlightedBlock={lensState.highlightedBlock}
+                  originFilter={lensState.originFilter}
                 />
               </div>
             );
@@ -227,61 +338,63 @@ export const PeriodicTable: React.FC<PeriodicTableProps> = ({
         </div>
       </div>
 
-      {/* Category Legend & Filter Bar */}
-      <div
-        role="group"
-        aria-label={t('table.legend', 'Element Categories')}
-        className="flex flex-wrap items-center gap-2 p-3 bg-slate-900/70 border border-slate-800 rounded-xl text-xs"
-      >
-        <span className="text-slate-300 font-medium mr-1">{t('table.categories', 'Categories:')}</span>
-        {(Object.keys(categoryMetadata) as ElementCategory[]).map((catKey) => {
-          const meta = categoryMetadata[catKey];
-          const isFilterActive = highlightedCategory === catKey;
-          const localizedName = t(`categories.${catKey}`, meta.name);
+      {/* Category Legend & Filter Bar (shown in category lens) */}
+      {(lensState.lens === 'category' || activeTrend) && (
+        <div
+          role="group"
+          aria-label={t('table.legend', 'Element Categories')}
+          className="flex flex-wrap items-center gap-2 p-3 bg-slate-900/70 border border-slate-800 rounded-xl text-xs"
+        >
+          <span className="text-slate-300 font-medium mr-1">{t('table.categories', 'Categories:')}</span>
+          {(Object.keys(categoryMetadata) as ElementCategory[]).map((catKey) => {
+            const meta = categoryMetadata[catKey];
+            const isFilterActive = highlightedCategory === catKey;
+            const localizedName = t(`categories.${catKey}`, meta.name);
 
-          return (
+            return (
+              <button
+                key={catKey}
+                type="button"
+                data-category-tag={catKey}
+                aria-pressed={isFilterActive}
+                aria-label={`${localizedName} filter: ${meta.description}`}
+                onClick={() => onSelectCategory && onSelectCategory(isFilterActive ? null : catKey)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all ${
+                  isFilterActive
+                    ? 'ring-2 ring-cyan-400 scale-105 font-bold shadow-md'
+                    : 'hover:scale-102 hover:border-slate-600'
+                }`}
+                style={{
+                  backgroundColor: meta.colorBg,
+                  borderColor: isFilterActive ? '#38bdf8' : meta.colorBorder,
+                  color: meta.colorText,
+                }}
+                title={`${localizedName}: ${meta.description}`}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: meta.colorBorder }}
+                  aria-hidden="true"
+                />
+                <span>{localizedName}</span>
+              </button>
+            );
+          })}
+
+          {highlightedCategory && (
             <button
-              key={catKey}
               type="button"
-              data-category-tag={catKey}
-              aria-pressed={isFilterActive}
-              aria-label={`${localizedName} filter: ${meta.description}`}
-              onClick={() => onSelectCategory && onSelectCategory(isFilterActive ? null : catKey)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all ${
-                isFilterActive
-                  ? 'ring-2 ring-cyan-400 scale-105 font-bold shadow-md'
-                  : 'hover:scale-102 hover:border-slate-600'
-              }`}
-              style={{
-                backgroundColor: meta.colorBg,
-                borderColor: isFilterActive ? '#38bdf8' : meta.colorBorder,
-                color: meta.colorText,
-              }}
-              title={`${localizedName}: ${meta.description}`}
+              onClick={() => onSelectCategory && onSelectCategory(null)}
+              aria-label={t('table.clearFilter', 'Clear Filter')}
+              className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-medium transition-colors ml-auto"
             >
-              <span
-                className="w-2.5 h-2.5 rounded-full shrink-0"
-                style={{ backgroundColor: meta.colorBorder }}
-                aria-hidden="true"
-              />
-              <span>{localizedName}</span>
+              {t('table.clearFilter', 'Clear Filter')}
             </button>
-          );
-        })}
+          )}
+        </div>
+      )}
 
-        {highlightedCategory && (
-          <button
-            type="button"
-            onClick={() => onSelectCategory && onSelectCategory(null)}
-            aria-label={t('table.clearFilter', 'Clear Filter')}
-            className="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 font-medium transition-colors ml-auto"
-          >
-            {t('table.clearFilter', 'Clear Filter')}
-          </button>
-        )}
-      </div>
-
-      {/* Fixed-Height Stable Preview & Status Bar (prevents layout shifts on hover) */}
+      {/* Fixed-Height Stable Preview & Status Bar */}
       <div
         role="status"
         aria-live="polite"

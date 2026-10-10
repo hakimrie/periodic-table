@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { ChemicalElement } from '../../types/element';
+import type { AppTab } from '../../types/navigation';
 import {
   Search,
   SlidersHorizontal,
@@ -12,6 +13,11 @@ import {
   Layers,
   Scale,
   GraduationCap,
+  Building2,
+  Atom,
+  Flame,
+  FlaskConical,
+  Command,
   X,
   Globe,
   ExternalLink,
@@ -25,8 +31,9 @@ interface HeaderProps {
   onSearchChange: (q: string) => void;
   filters: ElementFilterOptions;
   onFilterChange: (filters: ElementFilterOptions) => void;
-  activeTab: 'table' | 'trends' | 'compare' | 'quiz';
-  onTabChange: (tab: 'table' | 'trends' | 'compare' | 'quiz') => void;
+  activeTab: AppTab;
+  onTabChange: (tab: AppTab) => void;
+  onOpenCommandPalette?: () => void;
   isDarkTheme: boolean;
   onToggleTheme: () => void;
   onOpenHelp: () => void;
@@ -45,6 +52,7 @@ export const Header: React.FC<HeaderProps> = ({
   onFilterChange,
   activeTab,
   onTabChange,
+  onOpenCommandPalette,
   isDarkTheme,
   onToggleTheme,
   onOpenHelp,
@@ -111,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        {/* Search Field */}
+        {/* Search Field + Command Palette Trigger */}
         <div className="flex-1 max-w-md mx-2 relative">
           <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" aria-hidden="true" />
           <input
@@ -122,18 +130,33 @@ export const Header: React.FC<HeaderProps> = ({
             placeholder={t('app.searchPlaceholder')}
             aria-label={t('app.searchPlaceholder')}
             autoComplete="off"
-            className="w-full bg-slate-900/90 text-slate-100 placeholder-slate-400 text-xs sm:text-sm pl-9 pr-9 py-2 rounded-xl border border-slate-700/80 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none transition-all shadow-inner"
+            className="w-full bg-slate-900/90 text-slate-100 placeholder-slate-400 text-xs sm:text-sm pl-9 pr-16 py-2 rounded-xl border border-slate-700/80 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400 outline-none transition-all shadow-inner"
           />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => onSearchChange('')}
-              aria-label={t('app.clearSearch', 'Clear search input')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-cyan-400 p-0.5 rounded"
-            >
-              <X className="w-3.5 h-3.5" aria-hidden="true" />
-            </button>
-          )}
+          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+            {searchQuery ? (
+              <button
+                type="button"
+                onClick={() => onSearchChange('')}
+                aria-label={t('app.clearSearch', 'Clear search input')}
+                className="text-slate-400 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-cyan-400 p-0.5 rounded"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            ) : null}
+
+            {onOpenCommandPalette && (
+              <button
+                type="button"
+                onClick={onOpenCommandPalette}
+                aria-label="Open Command Palette (⌘K)"
+                title="Command Palette (⌘K / Ctrl+K)"
+                className="hidden sm:flex items-center gap-0.5 text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-cyan-300 border border-slate-700 transition-colors"
+              >
+                <Command className="w-3 h-3" aria-hidden="true" />
+                <span>K</span>
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Utilities: Filter, Favorites, Recent, Theme, Help */}
@@ -317,62 +340,118 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Navigation Tabs (Periodic Table, Periodic Trends, Compare, Quiz) */}
+      {/* Navigation Tabs (Periodic Table, Trends, 3D Skyline, Orbital Lab, Molecule Lab, Compare, Quiz) */}
       <nav aria-label={t('app.mainNav', 'Main navigation')} className="flex items-center gap-1 sm:gap-2 px-4 sm:px-6 overflow-x-auto text-xs font-semibold">
         <button
           type="button"
           onClick={() => onTabChange('table')}
           aria-current={activeTab === 'table' ? 'page' : undefined}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
             activeTab === 'table'
               ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
               : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
           }`}
         >
           <Layers className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{t('nav.table')}</span>
+          <span>{t('nav.table', 'Periodic Table')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onTabChange('skyline')}
+          aria-current={activeTab === 'skyline' ? 'page' : undefined}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
+            activeTab === 'skyline'
+              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
+              : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
+          }`}
+        >
+          <Building2 className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+          <span>{t('nav.skyline', '3D Skyline')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onTabChange('orbitals')}
+          aria-current={activeTab === 'orbitals' ? 'page' : undefined}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
+            activeTab === 'orbitals'
+              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
+              : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
+          }`}
+        >
+          <Atom className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+          <span>{t('nav.orbitals', 'Orbital Lab')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onTabChange('spectra')}
+          aria-current={activeTab === 'spectra' ? 'page' : undefined}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
+            activeTab === 'spectra'
+              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-md font-bold'
+              : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
+          }`}
+        >
+          <Flame className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+          <span>{t('nav.spectra', 'Spectra & Flame')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onTabChange('lab')}
+          aria-current={activeTab === 'lab' ? 'page' : undefined}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
+            activeTab === 'lab'
+              ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
+              : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
+          }`}
+        >
+          <FlaskConical className="w-3.5 h-3.5 text-cyan-400" aria-hidden="true" />
+          <span>{t('nav.lab', 'Molecule Lab')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => onTabChange('trends')}
           aria-current={activeTab === 'trends' ? 'page' : undefined}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
             activeTab === 'trends'
               ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
               : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
           }`}
         >
           <Sparkles className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{t('nav.trends')}</span>
+          <span>{t('nav.trends', 'Trends')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => onTabChange('compare')}
           aria-current={activeTab === 'compare' ? 'page' : undefined}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
             activeTab === 'compare'
               ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
               : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
           }`}
         >
           <Scale className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{t('nav.compare')}</span>
+          <span>{t('nav.compare', 'Compare')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => onTabChange('quiz')}
           aria-current={activeTab === 'quiz' ? 'page' : undefined}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all ${
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 ${
             activeTab === 'quiz'
               ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-md font-bold'
               : 'text-slate-400 hover:text-slate-200 border-transparent hover:border-slate-800'
           }`}
         >
           <GraduationCap className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{t('nav.quiz')}</span>
+          <span>{t('nav.quiz', 'Quiz')}</span>
         </button>
       </nav>
 

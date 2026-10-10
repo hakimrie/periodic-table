@@ -17,3 +17,7 @@ export function convertTemperature(kelvin: number | undefined, unit: Temperature
       return `${kelvin.toFixed(1)} K`;
   }
 }
+
+export function formatTemperature(kelvin: number | undefined, unit: TemperatureUnit): string {
+  return convertTemperature(kelvin, unit);
+}

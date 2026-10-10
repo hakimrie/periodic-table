@@ -7,6 +7,7 @@ import type {
   PeriodicTrendKey,
   TemperatureUnit,
 } from './types/element';
+import type { AppTab } from './types/navigation';
 import { allElements, getElementById, searchElements } from './data/elements';
 import type { ElementFilterOptions } from './data/elements';
 import { Header } from './components/Header/Header';
@@ -17,6 +18,11 @@ import { OrbitalDiagram } from './components/OrbitalDiagram/OrbitalDiagram';
 import { TrendVisualization } from './components/TrendVisualization/TrendVisualization';
 import { CompareElements } from './components/CompareElements/CompareElements';
 import { QuizMode } from './components/Quiz/QuizMode';
+import { Skyline3D } from './components/Skyline3D/Skyline3D';
+import { OrbitalCloud } from './components/OrbitalCloud/OrbitalCloud';
+import { SpectraLab } from './components/SpectraLab/SpectraLab';
+import { MoleculeLab } from './components/MoleculeLab/MoleculeLab';
+import { CommandPalette } from './components/CommandPalette/CommandPalette';
 import { HelpModal } from './components/HelpModal/HelpModal';
 import { useI18n } from './utils/i18n';
 import { parseElementFromPath } from './utils/url';
@@ -34,7 +40,73 @@ export function App() {
   const [selectedIon, setSelectedIon] = useState<CommonIon | null>(null);
 
   // App Navigation Tabs
-  const [activeTab, setActiveTab] = useState<'table' | 'trends' | 'compare' | 'quiz'>('table');
+  const [activeTab, setActiveTab] = useState<AppTab>(() => {
+    try {
+      const searchParam = new URLSearchParams(window.location.search).get('tab');
+      const searchTab = searchParam === 'molecule-lab' ? 'lab' : (searchParam as AppTab);
+      if (['table', 'skyline', 'orbitals', 'spectra', 'lab', 'trends', 'compare', 'quiz'].includes(searchTab)) {
+        return searchTab;
+      }
+    } catch {
+      // Ignore URL parsing errors
+    }
+    const rawHash = window.location.hash.replace('#', '');
+    const hash = rawHash === 'molecule-lab' ? 'lab' : (rawHash as AppTab);
+    if (['table', 'skyline', 'orbitals', 'spectra', 'lab', 'trends', 'compare', 'quiz'].includes(hash)) {
+      return hash;
+    }
+    return 'table';
+  });
+  const [showCommandPalette, setShowCommandPalette] = useState(() => {
+    try {
+      return typeof window !== 'undefined' && window.location.search.includes('palette');
+    } catch {
+      return false;
+    }
+  });
+
+  // Sync hash changes
+  useEffect(() => {
+    const handleHash = () => {
+      const rawHash = window.location.hash.replace('#', '');
+      const hash = rawHash === 'molecule-lab' ? 'lab' : (rawHash as AppTab);
+      if (['table', 'skyline', 'orbitals', 'spectra', 'lab', 'trends', 'compare', 'quiz'].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, []);
+
+  // Global keyboard shortcut for ⌘K / Ctrl+K Command Palette
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setShowCommandPalette((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // View transition helper for smooth tab switches
+  const changeTab = useCallback((tab: AppTab) => {
+    try {
+      if (window.location.hash !== `#${tab}`) {
+        window.history.replaceState(null, '', `#${tab}`);
+      }
+    } catch {
+      // Ignore if history state fails in sandboxed environment
+    }
+    if ('startViewTransition' in document) {
+      (document as any).startViewTransition(() => {
+        setActiveTab(tab);
+      });
+    } else {
+      setActiveTab(tab);
+    }
+  }, []);
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -180,6 +252,9 @@ export function App() {
   useEffect(() => {
     const titles: Record<string, string> = {
       table: `${selectedElement.name} (${selectedElement.symbol}, Z=${selectedElement.atomicNumber}) - ${t('app.title', 'Interactive Periodic Table')}`,
+      skyline: `${t('nav.skyline', '3D Skyline')} - ${t('app.title', 'Interactive Periodic Table')}`,
+      orbitals: `${t('nav.orbitals', 'Quantum Orbital Lab')} - ${t('app.title', 'Interactive Periodic Table')}`,
+      lab: `${t('nav.lab', 'Molecule Lab')} - ${t('app.title', 'Interactive Periodic Table')}`,
       trends: `${t('nav.trends', 'Trends Explorer')} - ${t('app.title', 'Interactive Periodic Table')}`,
       compare: `${t('nav.compare', 'Compare Elements')} - ${t('app.title', 'Interactive Periodic Table')}`,
       quiz: `${t('nav.quiz', 'Periodic Quiz')} - ${t('app.title', 'Interactive Periodic Table')}`,
@@ -209,7 +284,8 @@ export function App() {
         filters={filters}
         onFilterChange={setFilters}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={changeTab}
+        onOpenCommandPalette={() => setShowCommandPalette(true)}
         isDarkTheme={isDarkTheme}
         onToggleTheme={() => setIsDarkTheme(!isDarkTheme)}
         onOpenHelp={() => setShowHelpModal(true)}
@@ -330,7 +406,59 @@ export function App() {
           </div>
         )}
 
-        {/* TAB 2: PERIODIC TRENDS */}
+        {/* TAB 2: 3D ATOMIC SKYLINE */}
+        {activeTab === 'skyline' && (
+          <div className="animate-fade-in">
+            <Skyline3D
+              selectedElement={selectedElement}
+              onSelectElement={(el) => {
+                selectElement(el);
+              }}
+              isDarkTheme={isDarkTheme}
+            />
+          </div>
+        )}
+
+        {/* TAB 3: QUANTUM ORBITAL LAB */}
+        {activeTab === 'orbitals' && (
+          <div className="animate-fade-in">
+            <OrbitalCloud
+              element={selectedElement}
+              isDarkTheme={isDarkTheme}
+            />
+          </div>
+        )}
+
+        {/* TAB 4: SPECTRA & FLAME LAB */}
+        {activeTab === 'spectra' && (
+          <div className="animate-fade-in">
+            <SpectraLab
+              selectedElement={selectedElement}
+              onSelectElement={(el) => {
+                selectElement(el);
+              }}
+              isDarkTheme={isDarkTheme}
+            />
+          </div>
+        )}
+
+        {/* TAB 5: MOLECULE SYNTHESIS LAB */}
+        {activeTab === 'lab' && (
+          <div className="animate-fade-in">
+            <MoleculeLab
+              onSelectElementById={(z) => {
+                const el = getElementById(z);
+                if (el) {
+                  selectElement(el);
+                  changeTab('table');
+                }
+              }}
+              isDarkTheme={isDarkTheme}
+            />
+          </div>
+        )}
+
+        {/* TAB 5: PERIODIC TRENDS */}
         {activeTab === 'trends' && (
           <div className="animate-fade-in">
             <TrendVisualization
@@ -342,7 +470,7 @@ export function App() {
           </div>
         )}
 
-        {/* TAB 3: COMPARE ELEMENTS */}
+        {/* TAB 6: COMPARE ELEMENTS */}
         {activeTab === 'compare' && (
           <div className="animate-fade-in">
             <CompareElements
@@ -353,7 +481,7 @@ export function App() {
           </div>
         )}
 
-        {/* TAB 4: LEARNING QUIZ */}
+        {/* TAB 7: LEARNING QUIZ */}
         {activeTab === 'quiz' && (
           <div className="animate-fade-in">
             <QuizMode
@@ -362,7 +490,7 @@ export function App() {
                 const el = getElementById(id);
                 if (el) {
                   selectElement(el);
-                  setActiveTab('table');
+                  changeTab('table');
                 }
               }}
             />
@@ -396,6 +524,21 @@ export function App() {
 
       {/* Help Modal */}
       <HelpModal isOpen={showHelpModal} onClose={() => setShowHelpModal(false)} />
+
+      {/* ⌘K / Ctrl+K Command Palette */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        onSelectElement={(el) => {
+          selectElement(el);
+          changeTab('table');
+        }}
+        onTabChange={(tab) => changeTab(tab)}
+        onToggleTheme={() => setIsDarkTheme(!isDarkTheme)}
+        onToggleLang={() => setLang(lang === 'en' ? 'id' : 'en')}
+        onOpenHelp={() => setShowHelpModal(true)}
+        isDarkTheme={isDarkTheme}
+      />
     </div>
   );
 }

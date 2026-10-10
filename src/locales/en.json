@@ -24,6 +24,10 @@
   },
   "nav": {
     "table": "Periodic Table",
+    "skyline": "3D Skyline",
+    "orbitals": "Orbital Lab",
+    "spectra": "Spectra & Flame",
+    "lab": "Molecule Lab",
     "trends": "Periodic Trends",
     "compare": "Compare Elements",
     "quiz": "Learning Quiz",
